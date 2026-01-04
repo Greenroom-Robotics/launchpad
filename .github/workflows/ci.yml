@@ -47,6 +47,7 @@ jobs:
       id-token: write
       attestations: write
     uses: ./.github/workflows/compile-and-test.yml
+    secrets: inherit
     with:
       app-version: ${{ needs.prepare.outputs.APP_FULL_VERSION }}
       distribution-channel: ${{inputs.distribution-channel}}
@@ -59,6 +60,7 @@ jobs:
       - prepare
       - compile-and-test
     uses: ./.github/workflows/deploy.yml
+    secrets: inherit
     with:
       distribution-channel: ${{ inputs.distribution-channel }}
       app-version: ${{ needs.prepare.outputs.APP_FULL_VERSION }}
