@@ -1,12 +1,14 @@
+import { Box, Heading } from "grommet";
+
 export interface IApplicationTileProps {
     title: string
     src: string
 }
 export const ApplicationTile = ({ title, src }: IApplicationTileProps) => {
   return (
-    <div className="application-tile">
-      <h2>{title}</h2>
+    <Box width="medium">
+      <Heading level={3} margin={{ bottom: "small" }}>{title}</Heading>
       <img src={src} alt="Application Hero" />
-    </div>
+    </Box>
   );
 }

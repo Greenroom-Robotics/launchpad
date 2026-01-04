@@ -1,10 +1,16 @@
+import './index.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { GlobalStyles } from '@greenroom-robotics/alpha.ui/build/theme';
+import { BrowserRouter } from "react-router";
+import { App } from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <GlobalStyles>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </GlobalStyles>
   </StrictMode>,
 )

@@ -1,22 +1,19 @@
-import gamaHeroImage from '/gama-hero-box.svg'
-import lookoutHeroImage from '/lookout-hero-box.svg'
-import maropsHeroImage from '/marops-hero-box.svg'
-import missimHeroImage from '/missim-hero-box.svg'
+import { TexturedPanel } from './components/TexturedPanel';
+import { Sidebar } from './components/layout/Sidebar';
+import { Routes, Route } from "react-router";
+import { ApplicationsPage } from './pages/ApplicationsPage.tsx'
+import { SettingsPage } from './pages/SettingsPage.tsx';
+import { InstallerPage } from './pages/InstallerPage.tsx';
 
-import './App.css'
-import { ApplicationTile } from './components/application-tile'
-
-function App() {
-  return (
-    <>
-      <div className='application-tiles'>
-        <ApplicationTile title="GAMA" src={gamaHeroImage} />
-        <ApplicationTile title="Lookout+" src={lookoutHeroImage} />
-        <ApplicationTile title="MarOps" src={maropsHeroImage} />
-        <ApplicationTile title="MIS-SIM" src={missimHeroImage} />
-      </div>
-    </>
-  )
+export const App = () => {
+    return (
+        <TexturedPanel fill direction="row">
+          <Sidebar />
+          <Routes>
+            <Route path="/" element={<ApplicationsPage />} />
+            <Route path="/installer" element={<InstallerPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </TexturedPanel>
+    )
 }
-
-export default App
