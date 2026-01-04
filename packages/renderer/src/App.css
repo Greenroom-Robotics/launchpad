@@ -1,0 +1,16 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.application-tiles {
+  display: flex;
+  flex-direction: row;
+}
+
+.application-tile {
+  margin: 20px;
+  width: 300px;
+}
