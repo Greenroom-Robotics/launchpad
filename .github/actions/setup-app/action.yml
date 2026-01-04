@@ -1,0 +1,44 @@
+name: Setup application
+inputs:
+  node-version:
+    description: Node.js version to use
+    required: false
+    default: '23'
+
+runs:
+  using: "composite"
+  steps:
+    - if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: |
+        Xvfb :99 -screen 0 1280x960x24 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: npm-${{ runner.os }}-${{ hashFiles('**/package.json', '**/package-lock.json') }}
+        restore-keys: |
+          npm-${{ runner.os }}-
+
+    - name: Cache workspace node_modules
+      uses: actions/cache@v4
+      with:
+        path: packages/*/node_modules
+        key: npm-workspaces-${{ runner.os }}-${{ hashFiles('packages/*/package.json') }}
+        restore-keys: |
+          npm-workspaces-${{ runner.os }}-
+
+    - name: Install Dependencies
+      run: |
+        if [ -f "package-lock.json" ]; then
+          npm ci
+        else
+          npm install
+        fi
+      shell: bash

@@ -83,6 +83,15 @@ Launchpad uses [electron-builder] to create distributable applications:
 
 Built applications support auto-updates when distributed through official channels.
 
+### Creating Releases
+
+Official releases are created using a tag-based workflow. See [RELEASE.md](RELEASE.md) for detailed instructions on:
+
+- Creating version tags
+- Automated build and release process
+- Publishing releases
+- Troubleshooting release issues
+
 
 ### Working with third-party dependencies
 

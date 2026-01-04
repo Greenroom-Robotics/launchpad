@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Determine tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+
+          # Validate tag format (v1.2.3)
+          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid tag format: $TAG. Expected format: v1.2.3"
+            exit 1
+          fi
+
+          VERSION=${TAG#v}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release tag: $TAG"
+          echo "Release version: $VERSION"
+
+  release:
+    needs: validate-tag
+    uses: ./.github/workflows/ci.yml
+    with:
+      distribution-channel: 'release'
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+  publish:
+    needs: [validate-tag, release]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://github.com/${{ github.repository }}/releases/tag/${{ needs.validate-tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: "*-release"
+          path: dist
+          merge-multiple: true
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -2 | tail -1)
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, using initial commit"
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          echo "Generating release notes from $PREV_TAG to ${{ needs.validate-tag.outputs.tag }}"
+
+          # Generate changelog from commits
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREV_TAG}..${{ needs.validate-tag.outputs.tag }} --no-merges)
+
+          cat > release-notes.md << EOF
+          # Release ${{ needs.validate-tag.outputs.tag }}
+
+          ## What's Changed
+
+          $CHANGELOG
+
+          ## Download
+
+          Choose the appropriate installer for your platform:
+          - **Windows**: \`greenroom-launchpad-${{ needs.validate-tag.outputs.version }}-win-x64.exe\`
+          - **macOS**: \`greenroom-launchpad-${{ needs.validate-tag.outputs.version }}-mac-arm64.dmg\` or \`greenroom-launchpad-${{ needs.validate-tag.outputs.version }}-mac-x64.dmg\`
+          - **Linux**: \`greenroom-launchpad-${{ needs.validate-tag.outputs.version }}-linux-x64.deb\`
+
+          ---
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ needs.validate-tag.outputs.tag }}
+          EOF
+
+      - name: Create GitHub Release
+        run: |
+          gh release create ${{ needs.validate-tag.outputs.tag }} \
+            dist/root* dist/latest*.yml \
+            --repo ${{ github.repository }} \
+            --title "Release ${{ needs.validate-tag.outputs.tag }}" \
+            --notes-file release-notes.md \
+            --draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Update package.json version
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm version ${{ needs.validate-tag.outputs.version }} --no-git-tag-version
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to ${{ needs.validate-tag.outputs.version }}"
+          git push origin main

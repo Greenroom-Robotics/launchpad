@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - .editorconfig
+      - '.idea/**'
+      - '.vscode/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - .editorconfig
+      - '.idea/**'
+      - '.vscode/**'
+
+concurrency:
+  group: ${{github.workflow}}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    name: Build and Test
+    uses: ./.github/workflows/ci.yml
+    with:
+      distribution-channel: 'dev'
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write

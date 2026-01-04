@@ -3,11 +3,6 @@ name: Compile and test
 on:
   workflow_call:
     inputs:
-      renderer-template:
-        description: Define what vite template should be used to create renderer in case if renderer package doesn't exist
-        required: false
-        type: string
-        default: ''
       app-version:
         required: true
         type: string
@@ -31,14 +26,14 @@ env:
   npm_config_fund: false
 
 jobs:
-  typeckeck:
+  typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/actions/init-template-with-renderer
-        name: Setup boilerplate
+      - uses: ./.github/actions/setup-app
+        name: Setup application
         with:
-          renderer-template: ${{inputs.renderer-template}}
+          node-version: '23'
       - run: npm run typecheck --if-present
 
   compile:
@@ -52,10 +47,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/actions/init-template-with-renderer
-        name: Setup boilerplate
+      - uses: ./.github/actions/setup-app
+        name: Setup application
         with:
-          renderer-template: ${{inputs.renderer-template}}
+          node-version: '23'
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist
+            dist
+          key: build-${{ runner.os }}-${{ hashFiles('packages/*/src/**', 'packages/*/package.json') }}-${{ inputs.app-version }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ hashFiles('packages/*/src/**', 'packages/*/package.json') }}-
+            build-${{ runner.os }}-
 
       - run: npm version "${{inputs.app-version}}" --no-git-tag-version
       - run: npm run compile -- -p never
