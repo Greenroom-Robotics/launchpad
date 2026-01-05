@@ -67,6 +67,10 @@ const test = base.extend<TestFixtures>({
     });
 
     await page.waitForLoadState('load');
+
+    // Ensure browser window context is stable before proceeding
+    await electronApp.browserWindow(page);
+
     await use(page);
   },
 
