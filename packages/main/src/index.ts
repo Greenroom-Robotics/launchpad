@@ -8,6 +8,7 @@ import {autoUpdater} from './modules/AutoUpdater.js';
 import {allowInternalOrigins} from './modules/BlockNotAllowdOrigins.js';
 import {allowExternalUrls} from './modules/ExternalUrls.js';
 import {createConfigurationManager} from './modules/ConfigurationManager.js';
+import {createMenuManager} from './modules/MenuManager.js';
 
 
 export async function initApp(initConfig: AppInitConfig) {
@@ -18,6 +19,7 @@ export async function initApp(initConfig: AppInitConfig) {
     .init(hardwareAccelerationMode({enable: false}))
     .init(autoUpdater())
     .init(createConfigurationManager())
+    .init(createMenuManager())
 
     // Install DevTools extension if needed
     // .init(chromeDevToolsExtension({extension: 'VUEJS3_DEVTOOLS'}))

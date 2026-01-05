@@ -44,7 +44,7 @@ export const SettingsPage = () => {
 
   return (
     <Box fill>
-      <Header title="Settings" />
+      <Header title="Lauchpad - Settings" />
       <Box margin={{ horizontal: "medium", bottom: "medium" }} overflow="auto">
         {/* Show save status */}
         {isSaving && (

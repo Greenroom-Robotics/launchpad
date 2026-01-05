@@ -47,7 +47,7 @@ export const ApplicationsPage = () => {
 
   return (
     <Box fill>
-      <Header title="Launchpad" />
+      <Header title="Launchpad - Apps" />
       <Box fill overflow="auto">
         <Box direction="row" margin={{ horizontal: "medium", bottom: "medium" }} gap="medium" wrap>
           {enabledApplications.map(app => (
