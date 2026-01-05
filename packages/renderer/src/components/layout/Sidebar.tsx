@@ -1,8 +1,9 @@
 import { Sidebar as GrommetSidebar, Box } from 'grommet';
 import { Configure, AppsRounded } from 'grommet-icons';
 import styled from 'styled-components';
-import { Link, useMatch } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { SidebarButton } from './SidebarButton';
+import logoWhite from '/logo-white.svg';
 
 const Logo = styled(Box)`
   img {
@@ -13,8 +14,8 @@ const Logo = styled(Box)`
 `;
 
 export const Sidebar =() => {
-    const match = useMatch(window.location.pathname);
-    const route = match?.pathname || '/';
+    const location = useLocation();
+    const route = location.pathname;
 
     return (
       <GrommetSidebar
@@ -25,7 +26,7 @@ export const Sidebar =() => {
       >
         <Link to="/" style={{ textDecoration: 'white' }}>
           <Logo background="black">
-            <img src="/logo-white.svg" />
+            <img src={logoWhite} />
           </Logo>
         </Link>
         <Box flex gap="xsmall">

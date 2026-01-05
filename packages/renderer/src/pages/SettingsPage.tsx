@@ -67,9 +67,6 @@ export const SettingsPage = () => {
           schema={applicationConfigSchema}
           uiSchema={{
               'applications': {
-                'ui:options': {
-                  orderable: false,
-                },
                 'items': {
                   'ui:options': {
                     numColumns: 2,

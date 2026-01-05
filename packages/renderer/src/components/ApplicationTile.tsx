@@ -1,6 +1,6 @@
 import { Box, Heading, Text } from "grommet";
 import { useAsyncFn, useInterval, useEffectOnce } from "react-use";
-import { Loading } from '@greenroom-robotics/alpha.ui/build/components';
+import { Loading } from './Loading';
 import { useState } from "react";
 import gamaHeroImage from '/gama-hero-box.svg'
 import lookoutHeroImage from '/lookout-hero-box.svg'
@@ -109,7 +109,7 @@ export const ApplicationTile = ({ application, onClick, checkConnectivity }: IAp
           transition: 'filter 0.3s ease'
         }}
       />
-      <Loading overlay show={isClickLoading} size={60} background="rgba(0,0,0,0.5)"/>
+      <Loading overlay show={isClickLoading} background="rgba(0,0,0,0.5)"/>
     </Box>
   );
 }
