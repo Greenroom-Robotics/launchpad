@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "exports": {
     ".": {
@@ -14,8 +16,13 @@
   "dependencies": {
     "@app/preload": "*",
     "@app/renderer": "*",
+    "@app/shared": "*",
+    "@trpc/server": "11.8.1",
     "electron-store": "^11.0.2",
-    "electron-updater": "6.6.2"
+    "electron-trpc-experimental": "1.0.0-alpha.1",
+    "electron-updater": "6.6.2",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0"
   },
   "devDependencies": {
     "@app/electron-versions": "*",

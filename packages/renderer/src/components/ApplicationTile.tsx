@@ -1,27 +1,31 @@
-import { Box, Heading, Text } from "grommet";
-import { useAsyncFn, useInterval, useEffectOnce } from "react-use";
+import { Box, Heading, Text } from 'grommet';
+import { useAsyncFn, useInterval, useEffectOnce } from 'react-use';
 import { Loading } from './Loading';
-import { useState } from "react";
-import gamaHeroImage from '/gama-hero-box.svg'
-import lookoutHeroImage from '/lookout-hero-box.svg'
-import maropsHeroImage from '/marops-hero-box.svg'
-import missimHeroImage from '/missim-hero-box.svg'
-import type { ApplicationInstance } from "../types/config";
+import { useState } from 'react';
+import gamaHeroImage from '/gama-hero-box.svg';
+import lookoutHeroImage from '/lookout-hero-box.svg';
+import maropsHeroImage from '/marops-hero-box.svg';
+import missimHeroImage from '/missim-hero-box.svg';
+import type { ApplicationInstance } from '@app/shared';
 
 const applicationImages = {
   gama: gamaHeroImage,
   lookout: lookoutHeroImage,
   marops: maropsHeroImage,
-  missim: missimHeroImage
+  missim: missimHeroImage,
 } as const;
 
 export interface IApplicationTileProps {
-    application: ApplicationInstance
-    onClick?: () => void | Promise<void>
-    checkConnectivity?: (url: string) => Promise<{ connected: boolean; error?: string }>
+  application: ApplicationInstance;
+  onClick?: () => void | Promise<void>;
+  checkConnectivity?: (url: string) => Promise<{ connected: boolean; error?: string }>;
 }
 
-export const ApplicationTile = ({ application, onClick, checkConnectivity }: IApplicationTileProps) => {
+export const ApplicationTile = ({
+  application,
+  onClick,
+  checkConnectivity,
+}: IApplicationTileProps) => {
   // State to track loading when clicking the application
   const [isClickLoading, setIsClickLoading] = useState(false);
 
@@ -84,7 +88,7 @@ export const ApplicationTile = ({ application, onClick, checkConnectivity }: IAp
       style={{
         cursor: isClickable && !isClickLoading ? 'pointer' : 'default',
         opacity: connected ? 1 : 0.8,
-        position: 'relative'
+        position: 'relative',
       }}
       hoverIndicator={isClickable && !isClickLoading ? true : false}
       pad="small"
@@ -92,12 +96,10 @@ export const ApplicationTile = ({ application, onClick, checkConnectivity }: IAp
       title={application.url}
     >
       <Box direction="row" justify="between" align="center" margin={{ bottom: 'xsmall' }}>
-        <Heading level={4} margin="none">{application.name}</Heading>
-        <Text
-          size="xsmall"
-          color={getStatusColor()}
-          weight="bold"
-        >
+        <Heading level={4} margin="none">
+          {application.name}
+        </Heading>
+        <Text size="xsmall" color={getStatusColor()} weight="bold">
           {getStatusText()}
         </Text>
       </Box>
@@ -106,10 +108,10 @@ export const ApplicationTile = ({ application, onClick, checkConnectivity }: IAp
         alt="Application Hero"
         style={{
           filter: connected ? 'none' : 'grayscale(100%)',
-          transition: 'filter 0.3s ease'
+          transition: 'filter 0.3s ease',
         }}
       />
-      <Loading overlay show={isClickLoading} background="rgba(0,0,0,0.5)"/>
+      <Loading overlay show={isClickLoading} background="rgba(0,0,0,0.5)" />
     </Box>
   );
-}
+};

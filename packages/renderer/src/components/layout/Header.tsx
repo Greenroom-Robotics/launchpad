@@ -19,29 +19,26 @@ export const Divider = styled(Box)<IDividerProps>`
   elevation: small;
 `;
 
-export const Header = React.forwardRef(
-  ({ title, children, border }: IHeaderProps) => {
-
-    return (
-      <Box
-        pad="medium"
-        direction="row"
-        height="80px"
-        justify="between"
-        align="center"
-        flex={false}
-        border={border}
-      >
-        <Text weight="bold" color="white">
-          {title}
-        </Text>
-        <Box flex />
-        <Box direction="row" gap="small" align="center">
-          {children}
-        </Box>
+export const Header = React.forwardRef(({ title, children, border }: IHeaderProps) => {
+  return (
+    <Box
+      pad="medium"
+      direction="row"
+      height="80px"
+      justify="between"
+      align="center"
+      flex={false}
+      border={border}
+    >
+      <Text weight="bold" color="white">
+        {title}
+      </Text>
+      <Box flex />
+      <Box direction="row" gap="small" align="center">
+        {children}
       </Box>
-    );
-  },
-);
+    </Box>
+  );
+});
 
 Header.displayName = 'Header';

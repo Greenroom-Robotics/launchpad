@@ -48,11 +48,7 @@ export const SidebarButton = ({
     <Link to={to} style={{ textDecoration: 'white' }}>
       <Button hoverIndicator style={{ width: '100%', height: '50px' }}>
         <Box direction="row" gap="small" align="center" fill>
-          <Button
-            icon={icon}
-            disabled={disabled}
-            active={active || pathName === to}
-          />
+          <Button icon={icon} disabled={disabled} active={active || pathName === to} />
           <Text color="white" truncate style={{ width: 'auto' }}>
             {tip}
           </Text>

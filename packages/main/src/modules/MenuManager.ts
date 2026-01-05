@@ -1,12 +1,19 @@
-import type {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {Menu, BrowserWindow, MenuItemConstructorOptions} from 'electron';
-import {WindowManager, WINDOW_TYPES} from './WindowManager.js';
+import { singleton, inject } from 'tsyringe';
+import { Menu, BrowserWindow } from 'electron';
+import type { MenuItemConstructorOptions } from 'electron';
+import { WindowManager, WINDOW_TYPES } from './WindowManager.js';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
-export class MenuManager implements AppModule {
+@singleton()
+export class MenuManager implements IInitializable {
+  constructor(
+    @inject(WindowManager) private windowManager: WindowManager,
+    @inject(TYPES.ElectronApp) private app: Electron.App
+  ) {}
 
-  async enable({app}: ModuleContext): Promise<void> {
-    await app.whenReady();
+  async initialize(): Promise<void> {
+    await this.app.whenReady();
     this.setupApplicationMenu();
   }
 
@@ -20,15 +27,15 @@ export class MenuManager implements AppModule {
             accelerator: 'CmdOrCtrl+N',
             click: () => {
               this.createNewWindow();
-            }
+            },
           },
           { type: 'separator' },
           {
             label: 'Close',
             accelerator: 'CmdOrCtrl+W',
-            role: 'close'
-          }
-        ]
+            role: 'close',
+          },
+        ],
       },
       {
         label: 'Edit',
@@ -39,8 +46,8 @@ export class MenuManager implements AppModule {
           { role: 'cut' },
           { role: 'copy' },
           { role: 'paste' },
-          { role: 'selectAll' }
-        ]
+          { role: 'selectAll' },
+        ],
       },
       {
         label: 'View',
@@ -53,16 +60,13 @@ export class MenuManager implements AppModule {
           { role: 'zoomIn' },
           { role: 'zoomOut' },
           { type: 'separator' },
-          { role: 'togglefullscreen' }
-        ]
+          { role: 'togglefullscreen' },
+        ],
       },
       {
         label: 'Window',
-        submenu: [
-          { role: 'minimize' },
-          { role: 'close' }
-        ]
-      }
+        submenu: [{ role: 'minimize' }, { role: 'close' }],
+      },
     ];
 
     // On macOS, adjust the menu structure
@@ -78,8 +82,8 @@ export class MenuManager implements AppModule {
           { role: 'hideOthers' },
           { role: 'unhide' },
           { type: 'separator' },
-          { role: 'quit' }
-        ]
+          { role: 'quit' },
+        ],
       });
 
       // macOS Window menu adjustments
@@ -88,7 +92,7 @@ export class MenuManager implements AppModule {
         { role: 'minimize' },
         { role: 'zoom' },
         { type: 'separator' },
-        { role: 'front' }
+        { role: 'front' },
       ];
     }
 
@@ -97,31 +101,25 @@ export class MenuManager implements AppModule {
   }
 
   private createNewWindow(): void {
-    const windowManager = WindowManager.getInstance();
-    if (!windowManager) {
-      return;
-    }
-
     const focusedWindow = BrowserWindow.getFocusedWindow();
     if (!focusedWindow) {
-      windowManager.createNewWindow();
+      this.windowManager.createNewWindow();
       return;
     }
 
     // Get window metadata to determine window type
-    const metadata = windowManager.getWindowMetadata(focusedWindow);
+    const metadata = this.windowManager.getWindowMetadata(focusedWindow);
 
     if (!metadata || metadata.type === WINDOW_TYPES.LAUNCHPAD) {
-      windowManager.createNewWindow();
+      this.windowManager.createNewWindow();
     } else if (metadata.type === WINDOW_TYPES.APPLICATION) {
       // Create a new application window with the same URL and name
       if (metadata.applicationUrl && metadata.applicationName) {
-        windowManager.createNewApplicationWindow(metadata.applicationUrl, metadata.applicationName);
+        this.windowManager.createNewApplicationWindow(
+          metadata.applicationUrl,
+          metadata.applicationName
+        );
       }
     }
   }
-}
-
-export function createMenuManager() {
-  return new MenuManager();
 }

@@ -1,17 +1,17 @@
-import {AppModule} from '../AppModule.js';
+import { singleton, inject } from 'tsyringe';
 import * as Electron from 'electron';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
-class SingleInstanceApp implements AppModule {
-  enable({app}: {app: Electron.App}): void {
-    const isSingleInstance = app.requestSingleInstanceLock();
+@singleton()
+export class SingleInstanceApp implements IInitializable {
+  constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {}
+
+  initialize(): void {
+    const isSingleInstance = this.app.requestSingleInstanceLock();
     if (!isSingleInstance) {
-      app.quit();
+      this.app.quit();
       process.exit(0);
     }
   }
-}
-
-
-export function disallowMultipleAppInstance(...args: ConstructorParameters<typeof SingleInstanceApp>) {
-  return new SingleInstanceApp(...args);
 }

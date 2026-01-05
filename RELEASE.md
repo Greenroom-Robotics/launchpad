@@ -74,6 +74,7 @@ We follow [Semantic Versioning](https://semver.org/):
 - **PATCH**: Bug fixes (backward compatible)
 
 Examples:
+
 - `v1.0.0` - Initial release
 - `v1.1.0` - New feature added
 - `v1.1.1` - Bug fix
@@ -82,16 +83,19 @@ Examples:
 ## CI/CD Workflows
 
 ### Main CI (`.github/workflows/main.yml`)
+
 - Runs on every push to `main` and pull requests
 - Builds and tests the application
 - Used for development validation
 
 ### Entry CI (`.github/workflows/ci.yml`)
+
 - Reusable workflow called by other workflows
 - Handles the core build and test logic
 - Accepts `distribution-channel` parameter
 
 ### Release (`.github/workflows/release.yml`)
+
 - Triggered by version tags (`v*.*.*`)
 - Builds release artifacts for all platforms
 - Creates GitHub releases with auto-generated notes
@@ -107,11 +111,13 @@ The application includes auto-update functionality:
 ## Troubleshooting
 
 ### Tag Format Issues
+
 - Ensure tags follow the exact format: `v{MAJOR}.{MINOR}.{PATCH}`
 - Valid: `v1.0.0`, `v2.1.3`, `v0.1.0`
 - Invalid: `1.0.0`, `v1.0`, `v1.0.0-beta`
 
 ### Release Workflow Failures
+
 1. Check the [Actions tab](../../actions) for error details
 2. Common issues:
    - Build failures (check compilation errors)
@@ -119,7 +125,9 @@ The application includes auto-update functionality:
    - Permission issues (check repository settings)
 
 ### Manual Cleanup
+
 If a release fails and you need to retry:
+
 1. Delete the failed tag: `git tag -d v1.0.0 && git push origin :refs/tags/v1.0.0`
 2. Delete the draft release from GitHub
 3. Fix any issues and recreate the tag

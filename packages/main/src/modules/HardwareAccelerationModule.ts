@@ -1,21 +1,19 @@
-import {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
+import { singleton, inject } from 'tsyringe';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
-export class HardwareAccelerationModule implements AppModule {
+@singleton()
+export class HardwareAccelerationModule implements IInitializable {
   readonly #shouldBeDisabled: boolean;
 
-
-  constructor({enable}: {enable: boolean}) {
-    this.#shouldBeDisabled = !enable;
+  constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {
+    // Disable by default
+    this.#shouldBeDisabled = true;
   }
 
-  enable({app}: ModuleContext): Promise<void> | void {
+  initialize(): void {
     if (this.#shouldBeDisabled) {
-      app.disableHardwareAcceleration();
+      this.app.disableHardwareAcceleration();
     }
   }
-}
-
-export function hardwareAccelerationMode(...args: ConstructorParameters<typeof HardwareAccelerationModule>) {
-  return new HardwareAccelerationModule(...args);
 }

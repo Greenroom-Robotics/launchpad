@@ -1,11 +1,12 @@
+import { singleton } from 'tsyringe';
 import Store from 'electron-store';
-import { ipcMain, net } from 'electron';
-import type { ApplicationInstance, LaunchpadConfig } from '../types/config.js';
-import { defaultConfig } from '../types/config.js';
-import { AppModule } from '../AppModule.js';
-import { WindowManager } from './WindowManager.js';
+import { net } from 'electron';
+import type { ApplicationInstance, LaunchpadConfig } from '@app/shared';
+import { defaultConfig } from '@app/shared';
+import type { IInitializable } from '../interfaces.js';
 
-export class ConfigurationManager implements AppModule {
+@singleton()
+export class ConfigurationManager implements IInitializable {
   private store: Store<LaunchpadConfig>;
 
   constructor() {
@@ -22,56 +23,21 @@ export class ConfigurationManager implements AppModule {
               name: { type: 'string' },
               type: {
                 type: 'string',
-                enum: ['gama', 'lookout', 'marops', 'missim']
+                enum: ['gama', 'lookout', 'marops', 'missim'],
               },
               url: { type: 'string' },
               description: { type: 'string' },
-              enabled: { type: 'boolean' }
+              enabled: { type: 'boolean' },
             },
-            required: ['id', 'name', 'type', 'url', 'enabled']
-          }
-        }
-      }
+            required: ['id', 'name', 'type', 'url', 'enabled'],
+          },
+        },
+      },
     });
   }
 
-  async enable() {
-    // Set up IPC handlers for configuration management
-    ipcMain.handle('config:getApplications', () => {
-      return this.getApplications();
-    });
-
-    ipcMain.handle('config:setApplications', (_, applications: ApplicationInstance[]) => {
-      return this.setApplications(applications);
-    });
-
-    ipcMain.handle('config:getConfig', () => {
-      return this.getConfig();
-    });
-
-    ipcMain.handle('config:setConfig', (_, config: LaunchpadConfig) => {
-      return this.setConfig(config);
-    });
-
-    ipcMain.handle('config:resetToDefault', () => {
-      return this.resetToDefault();
-    });
-
-    // Handle opening application URLs in new Electron windows
-    ipcMain.handle('app:openApplication', async (_, { url, name }: { url: string; name: string }) => {
-      const windowManager = WindowManager.getInstance();
-      if (!windowManager) {
-        throw new Error('WindowManager not available');
-      }
-      await windowManager.createApplicationWindow(url, name);
-      // Return simple success response instead of the BrowserWindow object
-      return { success: true, url, name };
-    });
-
-    // Handle connectivity checking
-    ipcMain.handle('app:checkConnectivity', async (_, url: string) => {
-      return this.checkConnectivity(url);
-    });
+  async initialize(): Promise<void> {
+    // IPC handlers have been migrated to tRPC
   }
 
   getApplications(): ApplicationInstance[] {
@@ -84,7 +50,7 @@ export class ConfigurationManager implements AppModule {
 
   getConfig(): LaunchpadConfig {
     return {
-      applications: this.getApplications()
+      applications: this.getApplications(),
     };
   }
 
@@ -130,13 +96,8 @@ export class ConfigurationManager implements AppModule {
     } catch (error) {
       return {
         connected: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
-
-}
-
-export function createConfigurationManager() {
-  return new ConfigurationManager();
 }

@@ -1,14 +1,15 @@
-import type {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {BrowserWindow} from 'electron';
-import type {AppInitConfig} from '../AppInitConfig.js';
+import { singleton, inject } from 'tsyringe';
+import { TYPES } from '../types.js';
+import { BrowserWindow } from 'electron';
+import type { AppInitConfig } from '../AppInitConfig.js';
+import type { IInitializable } from '../interfaces.js';
 
 const WINDOW_TYPES = {
   LAUNCHPAD: 'launchpad',
-  APPLICATION: 'application'
+  APPLICATION: 'application',
 } as const;
 
-type WindowType = typeof WINDOW_TYPES[keyof typeof WINDOW_TYPES];
+type WindowType = (typeof WINDOW_TYPES)[keyof typeof WINDOW_TYPES];
 
 interface WindowMetadata {
   type: WindowType;
@@ -16,31 +17,28 @@ interface WindowMetadata {
   applicationUrl?: string;
 }
 
-export class WindowManager implements AppModule {
-  readonly #preload: {path: string};
-  readonly #renderer: {path: string} | URL;
+@singleton()
+export class WindowManager implements IInitializable {
+  readonly #preload: { path: string };
+  readonly #renderer: { path: string } | URL;
   readonly #openDevTools;
   readonly #applicationWindows: Map<string, BrowserWindow> = new Map();
   readonly #windowMetadata: WeakMap<BrowserWindow, WindowMetadata> = new WeakMap();
 
-  private static instance: WindowManager | null = null;
-
-  constructor({initConfig, openDevTools = false}: {initConfig: AppInitConfig, openDevTools?: boolean}) {
+  constructor(
+    @inject(TYPES.AppInitConfig) initConfig: AppInitConfig,
+    @inject(TYPES.ElectronApp) private app: Electron.App
+  ) {
     this.#preload = initConfig.preload;
     this.#renderer = initConfig.renderer;
-    this.#openDevTools = openDevTools;
-    WindowManager.instance = this;
+    this.#openDevTools = false;
   }
 
-  static getInstance(): WindowManager | null {
-    return WindowManager.instance;
-  }
-
-  async enable({app}: ModuleContext): Promise<void> {
-    await app.whenReady();
+  async initialize(): Promise<void> {
+    await this.app.whenReady();
     await this.restoreOrCreateWindow(true);
-    app.on('second-instance', () => this.restoreOrCreateWindow(true));
-    app.on('activate', () => this.restoreOrCreateWindow(true));
+    this.app.on('second-instance', () => this.restoreOrCreateWindow(true));
+    this.app.on('activate', () => this.restoreOrCreateWindow(true));
   }
 
   async createWindow(): Promise<BrowserWindow> {
@@ -48,7 +46,7 @@ export class WindowManager implements AppModule {
       width: 1200,
       height: 800,
       show: false, // Use the 'ready-to-show' event to show the instantiated BrowserWindow.
-      title: "Greenroom | Launchpad",
+      title: 'Greenroom | Launchpad',
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -60,7 +58,7 @@ export class WindowManager implements AppModule {
 
     // Mark this as a Launchpad window
     this.#windowMetadata.set(browserWindow, {
-      type: WINDOW_TYPES.LAUNCHPAD
+      type: WINDOW_TYPES.LAUNCHPAD,
     });
 
     if (this.#renderer instanceof URL) {
@@ -73,7 +71,7 @@ export class WindowManager implements AppModule {
   }
 
   async restoreOrCreateWindow(show = false) {
-    let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+    let window = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed());
 
     if (window === undefined) {
       window = await this.createWindow();
@@ -128,7 +126,7 @@ export class WindowManager implements AppModule {
     this.#windowMetadata.set(browserWindow, {
       type: WINDOW_TYPES.APPLICATION,
       applicationName: applicationName,
-      applicationUrl: url
+      applicationUrl: url,
     });
 
     // Store window reference before loading
@@ -148,13 +146,16 @@ export class WindowManager implements AppModule {
     });
 
     // Handle load errors
-    browserWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-      console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
-      // Show the window even on load failure so user can see the error
-      if (!browserWindow.isDestroyed()) {
-        browserWindow.show();
+    browserWindow.webContents.on(
+      'did-fail-load',
+      (_event, errorCode, errorDescription, validatedURL) => {
+        console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+        // Show the window even on load failure so user can see the error
+        if (!browserWindow.isDestroyed()) {
+          browserWindow.show();
+        }
       }
-    });
+    );
 
     try {
       // Load the application URL
@@ -201,7 +202,7 @@ export class WindowManager implements AppModule {
 
   showLaunchpadWindow(): void {
     // Find existing Launchpad window
-    const launchpadWindow = BrowserWindow.getAllWindows().find(window => {
+    const launchpadWindow = BrowserWindow.getAllWindows().find((window) => {
       const metadata = this.#windowMetadata.get(window);
       return metadata && metadata.type === WINDOW_TYPES.LAUNCHPAD && !window.isDestroyed();
     });
@@ -239,7 +240,7 @@ export class WindowManager implements AppModule {
     this.#windowMetadata.set(browserWindow, {
       type: WINDOW_TYPES.APPLICATION,
       applicationName: applicationName,
-      applicationUrl: url
+      applicationUrl: url,
     });
 
     // Open dev tools if needed
@@ -248,9 +249,12 @@ export class WindowManager implements AppModule {
     }
 
     // Handle load errors
-    browserWindow.webContents.on('did-fail-load', (_, errorCode, errorDescription, validatedURL) => {
-      console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
-    });
+    browserWindow.webContents.on(
+      'did-fail-load',
+      (_, errorCode, errorDescription, validatedURL) => {
+        console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+      }
+    );
 
     try {
       // Load the application URL
@@ -261,11 +265,6 @@ export class WindowManager implements AppModule {
 
     return browserWindow;
   }
-
-}
-
-export function createWindowManagerModule(...args: ConstructorParameters<typeof WindowManager>) {
-  return new WindowManager(...args);
 }
 
 export { WINDOW_TYPES };

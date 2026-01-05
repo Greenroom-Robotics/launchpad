@@ -13,47 +13,47 @@ const Logo = styled(Box)`
   margin-bottom: 15px;
 `;
 
-export const Sidebar =() => {
-    const location = useLocation();
-    const route = location.pathname;
+export const Sidebar = () => {
+  const location = useLocation();
+  const route = location.pathname;
 
-    return (
-      <GrommetSidebar
-        background="dark-3"
-        color="white"
-        style={{ position: 'relative', width: '77px' }}
-        flex={false}
-      >
-        <Link to="/" style={{ textDecoration: 'white' }}>
-          <Logo background="black">
-            <img src={logoWhite} />
-          </Logo>
-        </Link>
-        <Box flex gap="xsmall">
-          <SidebarButton
-            tip="Launchpad"
-            pathName={route}
-            active={route === '/'}
-            to={`/`}
-            icon={<AppsRounded />}
-          />
-          {/* <SidebarButton
+  return (
+    <GrommetSidebar
+      background="dark-3"
+      color="white"
+      style={{ position: 'relative', width: '77px' }}
+      flex={false}
+    >
+      <Link to="/" style={{ textDecoration: 'white' }}>
+        <Logo background="black">
+          <img src={logoWhite} />
+        </Logo>
+      </Link>
+      <Box flex gap="xsmall">
+        <SidebarButton
+          tip="Launchpad"
+          pathName={route}
+          active={route === '/'}
+          to={`/`}
+          icon={<AppsRounded />}
+        />
+        {/* <SidebarButton
             tip="Install"
             pathName={route}
             active={route.startsWith('/installer')}
             to={`/installer`}
             icon={<Install />}
           /> */}
-        </Box>
-        <Box gap="xsmall" flex={false}>
-          <SidebarButton
-            tip="Settings"
-            pathName={route}
-            active={route.includes('/settings')}
-            to={`/settings`}
-            icon={<Configure />}
-          />
-        </Box>
-      </GrommetSidebar>
-    );
-  }
+      </Box>
+      <Box gap="xsmall" flex={false}>
+        <SidebarButton
+          tip="Settings"
+          pathName={route}
+          active={route.includes('/settings')}
+          to={`/settings`}
+          icon={<Configure />}
+        />
+      </Box>
+    </GrommetSidebar>
+  );
+};
