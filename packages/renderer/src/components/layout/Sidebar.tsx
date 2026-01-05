@@ -1,5 +1,5 @@
 import { Sidebar as GrommetSidebar, Box } from 'grommet';
-import { Configure, Install, AppsRounded } from 'grommet-icons';
+import { Configure, AppsRounded } from 'grommet-icons';
 import styled from 'styled-components';
 import { Link, useMatch } from 'react-router';
 import { SidebarButton } from './SidebarButton';
@@ -36,13 +36,13 @@ export const Sidebar =() => {
             to={`/`}
             icon={<AppsRounded />}
           />
-          <SidebarButton
+          {/* <SidebarButton
             tip="Install"
             pathName={route}
             active={route.startsWith('/installer')}
             to={`/installer`}
             icon={<Install />}
-          />
+          /> */}
         </Box>
         <Box gap="xsmall" flex={false}>
           <SidebarButton
