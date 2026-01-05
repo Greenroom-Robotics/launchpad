@@ -1,4 +1,11 @@
-import type { RJSFSchema } from "@greenroom-robotics/alpha.schema-form";
+import type { RJSFSchema } from '@greenroom-robotics/alpha.schema-form';
+
+// Extended schema type that supports enumNames
+interface ExtendedRJSFSchema extends RJSFSchema {
+  enumNames?: string[];
+  properties?: Record<string, ExtendedRJSFSchema>;
+  items?: ExtendedRJSFSchema;
+}
 
 export interface ApplicationInstance {
   id: string;
@@ -13,7 +20,7 @@ export interface LaunchpadConfig {
   applications: ApplicationInstance[];
 }
 
-export const applicationConfigSchema: RJSFSchema = {
+export const applicationConfigSchema: ExtendedRJSFSchema = {
   "type": "object",
   "properties": {
     "applications": {
@@ -36,7 +43,7 @@ export const applicationConfigSchema: RJSFSchema = {
             "type": "string",
             "title": "Application Type",
             "enum": ["gama", "lookout", "marops", "missim"],
-            "enumNames": ["GAMA", "Lookout+", "MarOps", "MIS-SIM"] as any
+            "enumNames": ["GAMA", "Lookout+", "MarOps", "MIS-SIM"]
           },
           "url": {
             "type": "string",
@@ -66,29 +73,29 @@ export const applicationConfigSchema: RJSFSchema = {
 export const defaultConfig: LaunchpadConfig = {
   applications: [
     {
-      id: 'gama-local',
-      name: 'GAMA',
+      id: 'local-gama',
+      name: 'Local - GAMA',
       type: 'gama',
       url: 'http://localhost:3000',
       enabled: true
     },
     {
-      id: 'lookout-local',
-      name: 'Lookout+',
+      id: 'local-lookout',
+      name: 'Local - Lookout+',
       type: 'lookout',
       url: 'http://localhost:4000',
       enabled: true
     },
     {
-      id: 'marops-local',
-      name: 'MarOps',
+      id: 'local-marops',
+      name: 'Local - MarOps',
       type: 'marops',
       url: 'http://localhost:7000',
       enabled: true
     },
     {
-      id: 'missim-local',
-      name: 'MIS-SIM',
+      id: 'local-missim',
+      name: 'Local - MIS-SIM',
       type: 'missim',
       url: 'http://localhost:5000',
       enabled: true

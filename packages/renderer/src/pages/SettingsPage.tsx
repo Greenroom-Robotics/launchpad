@@ -64,7 +64,7 @@ export const SettingsPage = () => {
         )}
 
         <SchemaForm
-          schema={applicationConfigSchema as any}
+          schema={applicationConfigSchema}
           uiSchema={{
               'applications': {
                 'ui:options': {
