@@ -4,7 +4,8 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "exports": {
     ".": {

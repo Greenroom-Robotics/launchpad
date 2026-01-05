@@ -23,7 +23,7 @@
     "start": "node packages/dev-mode.js",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present && prettier --check .",
-    "format": "prettier --write .",
+    "format": "npm run format -ws --if-present",
     "generate-icons": "inkscape buildResources/icon.svg --export-type=png --export-filename=buildResources/icon-1024.png --export-width=1024 --export-height=1024 --export-background-opacity=0 && npx electron-icon-builder --input=buildResources/icon-1024.png --output=buildResources --flatten && mv buildResources/icons/* buildResources/ && rmdir buildResources/icons"
   },
   "devDependencies": {
