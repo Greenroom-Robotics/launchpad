@@ -16,7 +16,7 @@
     "paths": {
       "@app/preload": ["../preload"],
       "@app/renderer": ["../renderer"],
-      "@app/shared": ["../shared"]
+      "@app/shared": ["../shared/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "../../types/**/*.d.ts"],

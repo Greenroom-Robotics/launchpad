@@ -34,7 +34,7 @@ jobs:
         name: Setup application
         with:
           node-version: '24'
-          api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
+          api-token-github: ${{ secrets.SOFTWARE_TEAM_READ_PACKAGES_API_TOKEN_GITHUB }}
       - run: npm run lint
 
   typecheck:
@@ -45,7 +45,7 @@ jobs:
         name: Setup application
         with:
           node-version: '24'
-          api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
+          api-token-github: ${{ secrets.SOFTWARE_TEAM_READ_PACKAGES_API_TOKEN_GITHUB }}
       - run: npm run typecheck
 
   compile:
@@ -63,7 +63,7 @@ jobs:
         name: Setup application
         with:
           node-version: '24'
-          api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
+          api-token-github: ${{ secrets.SOFTWARE_TEAM_READ_PACKAGES_API_TOKEN_GITHUB }}
 
       - name: Cache build artifacts
         uses: actions/cache@v4

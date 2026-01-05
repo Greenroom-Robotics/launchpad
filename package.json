@@ -20,7 +20,7 @@
     "build": "npm run build --workspaces --if-present",
     "compile": "npm run build && electron-builder build --config electron-builder.mjs",
     "test": "npx playwright test ./tests/e2e.spec.ts",
-    "start": "node packages/dev-mode.js",
+    "start": "npm run build -w @app/shared && node packages/dev-mode.js",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present && prettier --check .",
     "format": "npm run format --workspaces --if-present",
