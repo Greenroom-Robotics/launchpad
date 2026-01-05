@@ -1,20 +1,25 @@
-import {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {shell} from 'electron';
-import {URL} from 'node:url';
+import { singleton, inject } from 'tsyringe';
+import { shell } from 'electron';
+import { URL } from 'node:url';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
-export class ExternalUrls implements AppModule {
+@singleton()
+export class ExternalUrls implements IInitializable {
 
   readonly #externalUrls: Set<string>;
 
-  constructor(externalUrls: Set<string>) {
+  constructor(
+    @inject(TYPES.ElectronApp) private app: Electron.App,
+    externalUrls: Set<string>
+  ) {
     this.#externalUrls = externalUrls;
   }
 
-  enable({app}: ModuleContext): Promise<void> | void {
-    app.on('web-contents-created', (_, contents) => {
-      contents.setWindowOpenHandler(({url}) => {
-        const {origin} = new URL(url);
+  initialize(): void {
+    this.app.on('web-contents-created', (_, contents) => {
+      contents.setWindowOpenHandler(({ url }) => {
+        const { origin } = new URL(url);
 
         if (this.#externalUrls.has(origin)) {
           shell.openExternal(url).catch(console.error);
@@ -23,13 +28,9 @@ export class ExternalUrls implements AppModule {
         }
 
         // Prevent creating a new window.
-        return {action: 'deny'};
+        return { action: 'deny' };
       });
     });
   }
 }
 
-
-export function allowExternalUrls(...args: ConstructorParameters<typeof ExternalUrls>) {
-  return new ExternalUrls(...args);
-}

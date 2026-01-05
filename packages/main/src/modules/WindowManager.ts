@@ -1,7 +1,8 @@
-import type {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {BrowserWindow} from 'electron';
-import type {AppInitConfig} from '../AppInitConfig.js';
+import { singleton, inject } from 'tsyringe';
+import { TYPES } from '../types.js';
+import { BrowserWindow } from 'electron';
+import type { AppInitConfig } from '../AppInitConfig.js';
+import type { IInitializable } from '../interfaces.js';
 
 const WINDOW_TYPES = {
   LAUNCHPAD: 'launchpad',
@@ -16,31 +17,28 @@ interface WindowMetadata {
   applicationUrl?: string;
 }
 
-export class WindowManager implements AppModule {
-  readonly #preload: {path: string};
-  readonly #renderer: {path: string} | URL;
+@singleton()
+export class WindowManager implements IInitializable {
+  readonly #preload: { path: string };
+  readonly #renderer: { path: string } | URL;
   readonly #openDevTools;
   readonly #applicationWindows: Map<string, BrowserWindow> = new Map();
   readonly #windowMetadata: WeakMap<BrowserWindow, WindowMetadata> = new WeakMap();
 
-  private static instance: WindowManager | null = null;
-
-  constructor({initConfig, openDevTools = false}: {initConfig: AppInitConfig, openDevTools?: boolean}) {
+  constructor(
+    @inject(TYPES.AppInitConfig) initConfig: AppInitConfig,
+    @inject(TYPES.ElectronApp) private app: Electron.App
+  ) {
     this.#preload = initConfig.preload;
     this.#renderer = initConfig.renderer;
-    this.#openDevTools = openDevTools;
-    WindowManager.instance = this;
+    this.#openDevTools = false;
   }
 
-  static getInstance(): WindowManager | null {
-    return WindowManager.instance;
-  }
-
-  async enable({app}: ModuleContext): Promise<void> {
-    await app.whenReady();
+  async initialize(): Promise<void> {
+    await this.app.whenReady();
     await this.restoreOrCreateWindow(true);
-    app.on('second-instance', () => this.restoreOrCreateWindow(true));
-    app.on('activate', () => this.restoreOrCreateWindow(true));
+    this.app.on('second-instance', () => this.restoreOrCreateWindow(true));
+    this.app.on('activate', () => this.restoreOrCreateWindow(true));
   }
 
   async createWindow(): Promise<BrowserWindow> {
@@ -262,10 +260,6 @@ export class WindowManager implements AppModule {
     return browserWindow;
   }
 
-}
-
-export function createWindowManagerModule(...args: ConstructorParameters<typeof WindowManager>) {
-  return new WindowManager(...args);
 }
 
 export { WINDOW_TYPES };

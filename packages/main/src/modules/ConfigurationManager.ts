@@ -1,14 +1,18 @@
+import { singleton, inject } from 'tsyringe';
 import Store from 'electron-store';
 import { ipcMain, net } from 'electron';
 import type { ApplicationInstance, LaunchpadConfig } from '../types/config.js';
 import { defaultConfig } from '../types/config.js';
-import { AppModule } from '../AppModule.js';
 import { WindowManager } from './WindowManager.js';
+import type { IInitializable } from '../interfaces.js';
 
-export class ConfigurationManager implements AppModule {
+@singleton()
+export class ConfigurationManager implements IInitializable {
   private store: Store<LaunchpadConfig>;
 
-  constructor() {
+  constructor(
+    @inject(WindowManager) private windowManager: WindowManager
+  ) {
     this.store = new Store<LaunchpadConfig>({
       name: 'launchpad-config',
       defaults: defaultConfig,
@@ -35,7 +39,7 @@ export class ConfigurationManager implements AppModule {
     });
   }
 
-  async enable() {
+  async initialize(): Promise<void> {
     // Set up IPC handlers for configuration management
     ipcMain.handle('config:getApplications', () => {
       return this.getApplications();
@@ -59,11 +63,7 @@ export class ConfigurationManager implements AppModule {
 
     // Handle opening application URLs in new Electron windows
     ipcMain.handle('app:openApplication', async (_, { url, name }: { url: string; name: string }) => {
-      const windowManager = WindowManager.getInstance();
-      if (!windowManager) {
-        throw new Error('WindowManager not available');
-      }
-      await windowManager.createApplicationWindow(url, name);
+      await this.windowManager.createApplicationWindow(url, name);
       // Return simple success response instead of the BrowserWindow object
       return { success: true, url, name };
     });
@@ -135,8 +135,4 @@ export class ConfigurationManager implements AppModule {
     }
   }
 
-}
-
-export function createConfigurationManager() {
-  return new ConfigurationManager();
 }

@@ -15,7 +15,9 @@
     "@app/preload": "*",
     "@app/renderer": "*",
     "electron-store": "^11.0.2",
-    "electron-updater": "6.6.2"
+    "electron-updater": "6.6.2",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0"
   },
   "devDependencies": {
     "@app/electron-versions": "*",

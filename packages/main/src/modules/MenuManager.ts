@@ -1,12 +1,19 @@
-import type {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {Menu, BrowserWindow, MenuItemConstructorOptions} from 'electron';
-import {WindowManager, WINDOW_TYPES} from './WindowManager.js';
+import { singleton, inject } from 'tsyringe';
+import { Menu, BrowserWindow, MenuItemConstructorOptions } from 'electron';
+import { WindowManager, WINDOW_TYPES } from './WindowManager.js';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
-export class MenuManager implements AppModule {
+@singleton()
+export class MenuManager implements IInitializable {
 
-  async enable({app}: ModuleContext): Promise<void> {
-    await app.whenReady();
+  constructor(
+    @inject(WindowManager) private windowManager: WindowManager,
+    @inject(TYPES.ElectronApp) private app: Electron.App
+  ) { }
+
+  async initialize(): Promise<void> {
+    await this.app.whenReady();
     this.setupApplicationMenu();
   }
 
@@ -97,31 +104,22 @@ export class MenuManager implements AppModule {
   }
 
   private createNewWindow(): void {
-    const windowManager = WindowManager.getInstance();
-    if (!windowManager) {
-      return;
-    }
-
     const focusedWindow = BrowserWindow.getFocusedWindow();
     if (!focusedWindow) {
-      windowManager.createNewWindow();
+      this.windowManager.createNewWindow();
       return;
     }
 
     // Get window metadata to determine window type
-    const metadata = windowManager.getWindowMetadata(focusedWindow);
+    const metadata = this.windowManager.getWindowMetadata(focusedWindow);
 
     if (!metadata || metadata.type === WINDOW_TYPES.LAUNCHPAD) {
-      windowManager.createNewWindow();
+      this.windowManager.createNewWindow();
     } else if (metadata.type === WINDOW_TYPES.APPLICATION) {
       // Create a new application window with the same URL and name
       if (metadata.applicationUrl && metadata.applicationName) {
-        windowManager.createNewApplicationWindow(metadata.applicationUrl, metadata.applicationName);
+        this.windowManager.createNewApplicationWindow(metadata.applicationUrl, metadata.applicationName);
       }
     }
   }
-}
-
-export function createMenuManager() {
-  return new MenuManager();
 }

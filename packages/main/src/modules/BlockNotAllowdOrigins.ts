@@ -1,6 +1,8 @@
-import {AbstractSecurityRule} from './AbstractSecurityModule.js';
+import { singleton, inject } from 'tsyringe';
 import * as Electron from 'electron';
-import {URL} from 'node:url';
+import { URL } from 'node:url';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
 /**
  * Block navigation to origins not on the allowlist.
@@ -10,18 +12,25 @@ import {URL} from 'node:url';
  *
  * @see https://www.electronjs.org/docs/latest/tutorial/security#13-disable-or-limit-navigation
  */
-export class BlockNotAllowedOrigins extends AbstractSecurityRule {
+@singleton()
+export class BlockNotAllowedOrigins implements IInitializable {
   readonly #allowedOrigins: Set<string>;
 
-  constructor(allowedOrigins: Set<string> = new Set) {
-    super();
+  constructor(
+    @inject(TYPES.ElectronApp) private app: Electron.App,
+    allowedOrigins: Set<string> = new Set
+  ) {
     this.#allowedOrigins = structuredClone(allowedOrigins)
   }
 
-  applyRule(contents: Electron.WebContents): Promise<void> | void {
+  initialize(): void {
+    this.app.on('web-contents-created', (_, contents) => this.applyRule(contents));
+  }
+
+  private applyRule(contents: Electron.WebContents): void {
 
     contents.on('will-navigate', (event, url) => {
-      const {origin} = new URL(url);
+      const { origin } = new URL(url);
       if (this.#allowedOrigins.has(origin)) {
         return;
       }
@@ -36,7 +45,3 @@ export class BlockNotAllowedOrigins extends AbstractSecurityRule {
   }
 }
 
-
-export function allowInternalOrigins(...args: ConstructorParameters<typeof BlockNotAllowedOrigins>): BlockNotAllowedOrigins {
-  return new BlockNotAllowedOrigins(...args);
-}

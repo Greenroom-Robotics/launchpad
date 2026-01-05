@@ -1,35 +1,28 @@
-import {AppModule} from '../AppModule.js';
-import electronUpdater, {type AppUpdater, type Logger} from 'electron-updater';
+import { singleton } from 'tsyringe';
+import electronUpdater, { type AppUpdater, type Logger } from 'electron-updater';
+import type { IInitializable } from '../interfaces.js';
 
 type DownloadNotification = Parameters<AppUpdater['checkForUpdatesAndNotify']>[0];
 
-export class AutoUpdater implements AppModule {
+@singleton()
+export class AutoUpdater implements IInitializable {
 
   readonly #logger: Logger | null;
   readonly #notification: DownloadNotification;
 
-  constructor(
-    {
-      logger = null,
-      downloadNotification = undefined,
-    }:
-      {
-        logger?: Logger | null | undefined,
-        downloadNotification?: DownloadNotification
-      } = {},
-  ) {
-    this.#logger = logger;
-    this.#notification = downloadNotification;
+  constructor() {
+    this.#logger = null;
+    this.#notification = undefined;
   }
 
-  async enable(): Promise<void> {
+  async initialize(): Promise<void> {
     await this.runAutoUpdater();
   }
 
   getAutoUpdater(): AppUpdater {
     // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
     // It is a workaround for ESM compatibility issues, see https://github.com/electron-userland/electron-builder/issues/7976.
-    const {autoUpdater} = electronUpdater;
+    const { autoUpdater } = electronUpdater;
     return autoUpdater;
   }
 
@@ -47,7 +40,7 @@ export class AutoUpdater implements AppModule {
 
       // Skip auto-updates for development channels or when running tests
       if (import.meta.env.VITE_DISTRIBUTION_CHANNEL &&
-          import.meta.env.VITE_DISTRIBUTION_CHANNEL !== 'release') {
+        import.meta.env.VITE_DISTRIBUTION_CHANNEL !== 'release') {
         console.log('Skipping auto-updater for non-release channel');
         return null;
       }
@@ -60,8 +53,8 @@ export class AutoUpdater implements AppModule {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes('No published versions') ||
-            error.message.includes('status 404') ||
-            error.message.includes('Cannot download')) {
+          error.message.includes('status 404') ||
+          error.message.includes('Cannot download')) {
           console.warn('AutoUpdater: No updates available or network error (ignored)');
           return null;
         }
@@ -73,7 +66,3 @@ export class AutoUpdater implements AppModule {
   }
 }
 
-
-export function autoUpdater(...args: ConstructorParameters<typeof AutoUpdater>) {
-  return new AutoUpdater(...args);
-}

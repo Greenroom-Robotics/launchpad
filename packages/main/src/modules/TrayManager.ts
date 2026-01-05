@@ -1,13 +1,20 @@
-import type {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {Tray, Menu, nativeImage, app} from 'electron';
-import {WindowManager} from './WindowManager.js';
+import { singleton, inject } from 'tsyringe';
+import { Tray, Menu, nativeImage, app } from 'electron';
+import { WindowManager } from './WindowManager.js';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
-export class TrayManager implements AppModule {
+@singleton()
+export class TrayManager implements IInitializable {
   #tray: Tray | null = null;
 
-  async enable({app}: ModuleContext): Promise<void> {
-    await app.whenReady();
+  constructor(
+    @inject(WindowManager) private windowManager: WindowManager,
+    @inject(TYPES.ElectronApp) private app: Electron.App
+  ) { }
+
+  async initialize(): Promise<void> {
+    await this.app.whenReady();
     this.setupSystemTray();
   }
 
@@ -56,10 +63,7 @@ export class TrayManager implements AppModule {
   }
 
   private showLaunchpadWindow(): void {
-    const windowManager = WindowManager.getInstance();
-    if (windowManager) {
-      windowManager.showLaunchpadWindow();
-    }
+    this.windowManager.showLaunchpadWindow();
   }
 
   destroy(): void {
@@ -68,8 +72,4 @@ export class TrayManager implements AppModule {
       this.#tray = null;
     }
   }
-}
-
-export function createTrayManager() {
-  return new TrayManager();
 }

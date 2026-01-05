@@ -1,6 +1,7 @@
-import {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {app} from 'electron';
+import { singleton, inject } from 'tsyringe';
+import { app } from 'electron';
+import type { IInitializable } from '../interfaces.js';
+import { TYPES } from '../types.js';
 
 interface AutoStartOptions {
   enabled?: boolean;
@@ -8,21 +9,23 @@ interface AutoStartOptions {
   openAsHidden?: boolean;
 }
 
-class AutoStartManager implements AppModule {
+@singleton()
+export class AutoStartManager implements IInitializable {
   readonly #options: AutoStartOptions;
 
-  constructor(options: AutoStartOptions = {}) {
+  constructor(
+    @inject(TYPES.ElectronApp) private app: Electron.App
+  ) {
     this.#options = {
       enabled: true,
       openAtLogin: true,
       openAsHidden: true,
-      ...options
     };
   }
 
-  async enable({app}: ModuleContext): Promise<void> {
+  async initialize(): Promise<void> {
     if (this.#options.enabled) {
-      await app.whenReady();
+      await this.app.whenReady();
       this.setupAutoStart();
     }
   }
@@ -67,8 +70,4 @@ class AutoStartManager implements AppModule {
     const settings = app.getLoginItemSettings();
     return settings.openAtLogin;
   }
-}
-
-export function createAutoStartManager(options?: AutoStartOptions) {
-  return new AutoStartManager(options);
 }
