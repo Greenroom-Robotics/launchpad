@@ -4,8 +4,8 @@ import { ApplicationTile } from '../components/ApplicationTile';
 import { useConfig } from '../hooks/useConfig';
 import { trpc } from '../trpc-react';
 import { useMemo } from 'react';
-import type { ApplicationInstance } from '../types/config';
 import { Link } from 'react-router';
+import type { ApplicationInstance } from '@app/shared';
 
 export const ApplicationsPage = () => {
   const { applications, openApplication } = useConfig();

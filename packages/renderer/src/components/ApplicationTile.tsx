@@ -6,7 +6,7 @@ import gamaHeroImage from '/gama-hero-box.svg';
 import lookoutHeroImage from '/lookout-hero-box.svg';
 import maropsHeroImage from '/marops-hero-box.svg';
 import missimHeroImage from '/missim-hero-box.svg';
-import type { ApplicationInstance } from '../types/config';
+import type { ApplicationInstance } from '@app/shared';
 
 const applicationImages = {
   gama: gamaHeroImage,
