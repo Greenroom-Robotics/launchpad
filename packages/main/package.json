@@ -17,7 +17,7 @@
     "@app/preload": "*",
     "@app/renderer": "*",
     "@app/shared": "*",
-    "@trpc/server": "11.3.1",
+    "@trpc/server": "11.8.1",
     "electron-store": "^11.0.2",
     "electron-trpc-experimental": "1.0.0-alpha.1",
     "electron-updater": "6.6.2",
