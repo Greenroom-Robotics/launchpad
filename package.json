@@ -17,7 +17,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @app/shared && npm run build --workspaces --if-present",
     "compile": "npm run build && electron-builder build --config electron-builder.mjs",
     "test": "npx playwright test ./tests/e2e.spec.ts",
     "start": "npm run build -w @app/shared && node packages/dev-mode.js",
