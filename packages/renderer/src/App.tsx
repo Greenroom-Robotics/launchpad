@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ipcLink } from 'electron-trpc-experimental/renderer';
 import { trpc } from './trpc-react';
+import { LoginPage } from './pages/LoginPage.tsx';
 
 export const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -16,6 +17,21 @@ export const App = () => {
       links: [ipcLink()],
     })
   );
+
+  // Check if this is a login window (based on URL parameters)
+  const urlParams = new URLSearchParams(window.location.search);
+  const isLoginWindow = urlParams.has('login');
+  const challengeId = urlParams.get('challengeId');
+
+  if (isLoginWindow) {
+    return (
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <LoginPage challengeId={challengeId!} />
+        </QueryClientProvider>
+      </trpc.Provider>
+    );
+  }
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>

@@ -4,10 +4,12 @@ import { net } from 'electron';
 import type { ApplicationInstance, LaunchpadConfig } from '@app/shared';
 import { defaultConfig } from '@app/shared';
 import type { IInitializable } from '../interfaces.js';
+import { SecureHttpClient } from '../lib/httpClient.js';
 
 @singleton()
 export class ConfigurationManager implements IInitializable {
   private store: Store<LaunchpadConfig>;
+  private httpClient: SecureHttpClient;
 
   constructor() {
     this.store = new Store<LaunchpadConfig>({
@@ -34,6 +36,7 @@ export class ConfigurationManager implements IInitializable {
         },
       },
     });
+    this.httpClient = new SecureHttpClient();
   }
 
   async initialize(): Promise<void> {
@@ -67,36 +70,22 @@ export class ConfigurationManager implements IInitializable {
     try {
       // First check if we have basic network connectivity
       if (!net.isOnline()) {
+        console.log(`[ConfigurationManager] No network connection detected`);
         return { connected: false, error: 'No network connection' };
       }
 
-      // Create a request to test the URL
-      const request = net.request(url);
+      // Use axios with SSL bypass for connectivity check
+      const result = await this.httpClient.checkConnectivity(url);
 
-      return new Promise((resolve) => {
-        const timeout = setTimeout(() => {
-          request.abort();
-          resolve({ connected: false, error: 'Connection timeout' });
-        }, 5000); // 5 second timeout
-
-        request.on('response', () => {
-          clearTimeout(timeout);
-          // Consider any response (even 404) as connected, since the server is responding
-          resolve({ connected: true });
-        });
-
-        request.on('error', (error) => {
-          clearTimeout(timeout);
-          resolve({ connected: false, error: error.message });
-        });
-
-        // Use HEAD request to avoid downloading content
-        request.end();
-      });
+      return {
+        connected: result.connected,
+        error: result.error,
+      };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         connected: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       };
     }
   }

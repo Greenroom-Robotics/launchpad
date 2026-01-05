@@ -1,8 +1,9 @@
-import { Box, Text } from 'grommet';
+import { Box, Text, Button, Heading } from 'grommet';
 import { Header } from '../components/layout/Header';
 import { SchemaForm } from '@greenroom-robotics/alpha.schema-form';
 import { useConfig } from '../hooks/useConfig';
 import { useAsyncFn } from 'react-use';
+import { trpc } from '../trpc-react';
 import type { RJSFSchema } from '@greenroom-robotics/alpha.schema-form';
 import type { LaunchpadConfig } from '@app/shared';
 
@@ -65,6 +66,16 @@ const applicationConfigSchema: ExtendedRJSFSchema = {
 export const SettingsPage = () => {
   const { applications, updateConfig } = useConfig();
 
+  // Get stored authentication hosts
+  const { data: storedHosts, refetch: refetchHosts } = trpc.app.getStoredAuthHosts.useQuery();
+
+  // Clear stored credentials mutation
+  const clearCredentials = trpc.app.clearStoredCredentials.useMutation({
+    onSuccess: () => {
+      refetchHosts();
+    },
+  });
+
   // Use useAsyncFn for form submission with built-in loading/error states
   const [submitState, handleSubmit] = useAsyncFn(
     async (data: LaunchpadConfig) => {
@@ -74,6 +85,14 @@ export const SettingsPage = () => {
     },
     [updateConfig]
   );
+
+  const handleClearAllCredentials = async () => {
+    try {
+      await clearCredentials.mutateAsync({});
+    } catch (error) {
+      console.error('Error clearing credentials:', error);
+    }
+  };
 
   if (applications.isLoading) {
     return (
@@ -138,6 +157,55 @@ export const SettingsPage = () => {
           onSubmit={handleSubmit}
           disabled={isSaving}
         />
+
+        {/* Authentication Management Section */}
+        <Box margin={{ top: 'large' }}>
+          <Heading level={3}>Authentication Management</Heading>
+
+          <Box margin={{ top: 'medium' }}>
+            <Text size="small" margin={{ bottom: 'small' }}>
+              Stored authentication credentials for {storedHosts?.hosts?.length || 0} hosts
+            </Text>
+
+            {storedHosts?.hosts && storedHosts.hosts.length > 0 && (
+              <Box margin={{ bottom: 'medium' }}>
+                <Text size="small" weight="bold">
+                  Stored credentials for:
+                </Text>
+                {storedHosts.hosts.map((host) => (
+                  <Text key={host} size="small" margin={{ left: 'small' }}>
+                    • {host}
+                  </Text>
+                ))}
+              </Box>
+            )}
+
+            <Box direction="row" gap="small" align="center">
+              <Button
+                label="Clear All Stored Credentials"
+                color="status-critical"
+                onClick={handleClearAllCredentials}
+                disabled={clearCredentials.isLoading || !storedHosts?.hosts?.length}
+              />
+              {clearCredentials.isLoading && <Text size="small">Clearing credentials...</Text>}
+              {clearCredentials.isSuccess && (
+                <Text size="small" color="status-ok">
+                  Credentials cleared successfully
+                </Text>
+              )}
+              {clearCredentials.isError && (
+                <Text size="small" color="status-error">
+                  Error clearing credentials
+                </Text>
+              )}
+            </Box>
+
+            <Text size="small" margin={{ top: 'small' }} color="text-weak">
+              This will remove all saved login credentials. You will need to re-enter them when
+              accessing protected applications.
+            </Text>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

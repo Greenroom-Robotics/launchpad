@@ -11,8 +11,7 @@ import { AutoUpdater } from './modules/AutoUpdater.js';
 import { BackgroundOperationManager } from './modules/BackgroundOperationManager.js';
 import { HardwareAccelerationModule } from './modules/HardwareAccelerationModule.js';
 import { SingleInstanceApp } from './modules/SingleInstanceApp.js';
-import { BlockNotAllowedOrigins } from './modules/BlockNotAllowdOrigins.js';
-import { ExternalUrls } from './modules/ExternalUrls.js';
+import { BasicAuthManager } from './modules/BasicAuthManager.js';
 import { appRouter } from './trpc/router.js';
 
 export type { AppRouter } from './trpc/router.js';
@@ -25,34 +24,16 @@ export async function initApp(initConfig: AppInitConfig) {
   const { createIPCHandler } = await import('electron-trpc-experimental/main');
   createIPCHandler({ router: appRouter });
 
-  // Create security services with runtime configuration
-  const allowedOrigins = new Set(
-    initConfig.renderer instanceof URL ? [initConfig.renderer.origin] : []
-  );
-  const externalUrls = new Set(
-    initConfig.renderer instanceof URL
-      ? [
-          'https://vite.dev',
-          'https://developer.mozilla.org',
-          'https://solidjs.com',
-          'https://qwik.dev',
-          'https://lit.dev',
-          'https://react.dev',
-          'https://preactjs.com',
-          'https://www.typescriptlang.org',
-          'https://vuejs.org',
-        ]
-      : []
-  );
-
   // Get the Electron app instance
   const app = container.resolve<Electron.App>('ElectronApp');
 
-  // Register security services manually since they need runtime args
-  container.register(BlockNotAllowedOrigins, {
-    useValue: new BlockNotAllowedOrigins(app, allowedOrigins),
+  // Ignore SSL certificate errors for offline environment applications
+  app.on('certificate-error', (event, _webContents, _url, _error, _certificate, callback) => {
+    // Prevent the default behavior
+    event.preventDefault();
+    // Accept the certificate regardless of errors
+    callback(true);
   });
-  container.register(ExternalUrls, { useValue: new ExternalUrls(app, externalUrls) });
 
   // Initialize services that need to run before app is ready
   const singleInstanceApp = container.resolve(SingleInstanceApp);
@@ -71,6 +52,12 @@ export async function initApp(initConfig: AppInitConfig) {
   const configurationManager = container.resolve(ConfigurationManager);
   await configurationManager.initialize();
 
+  const basicAuthManager = container.resolve(BasicAuthManager);
+  await basicAuthManager.initialize();
+
+  // Connect BasicAuthManager with WindowManager
+  basicAuthManager.setWindowManager(windowManager);
+
   const menuManager = container.resolve(MenuManager);
   await menuManager.initialize();
 
@@ -82,11 +69,4 @@ export async function initApp(initConfig: AppInitConfig) {
 
   const autoUpdater = container.resolve(AutoUpdater);
   await autoUpdater.initialize();
-
-  // Initialize security services
-  const blockNotAllowedOrigins = container.resolve(BlockNotAllowedOrigins);
-  blockNotAllowedOrigins.initialize();
-
-  const externalUrlsService = container.resolve(ExternalUrls);
-  externalUrlsService.initialize();
 }
