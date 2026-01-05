@@ -8,7 +8,7 @@ export const middleware = t.middleware;
 export const publicProcedure = t.procedure;
 
 // Middleware to resolve services from TSyringe container
-export const injectService = <T>(serviceToken: any) => {
+export const injectService = <T>(serviceToken: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
   return middleware(async ({ next, ctx }) => {
     const service = container.resolve<T>(serviceToken);
     return next({
