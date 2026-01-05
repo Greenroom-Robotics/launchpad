@@ -1,5 +1,5 @@
 {
-  "name": "@greenroom-robotics/launchpad",
+  "name": "greenroom-launchpad",
   "productName": "Greenroom Launchpad",
   "description": "Unified launcher for Greenroom Robotics desktop applications",
   "version": "0.0.1",

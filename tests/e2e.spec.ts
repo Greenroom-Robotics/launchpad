@@ -18,11 +18,16 @@ const test = base.extend<TestFixtures>({
   electronApp: [async ({}, use) => {
 
     /**
-     * Executable path depends on package name!
+     * Executable path depends on platform and product name!
      */
-    let executablePattern = 'dist/*/@greenroom-roboticslaunchpad{,.*}';
+    let executablePattern: string;
     if (platform === 'darwin') {
-      executablePattern += '/Contents/*/@greenroom-roboticslaunchpad';
+      executablePattern = 'dist/mac*/**/Greenroom Launchpad.app/Contents/MacOS/Greenroom Launchpad';
+    } else if (platform === 'win32') {
+      executablePattern = 'dist/win*/**/Greenroom Launchpad.exe';
+    } else {
+      // Linux and other platforms
+      executablePattern = 'dist/linux*/**/greenroom-launchpad';
     }
 
     const [executablePath] = globSync(executablePattern);
