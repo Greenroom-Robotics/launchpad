@@ -46,7 +46,9 @@ export class AutoUpdater implements AppModule {
       return await updater.checkForUpdatesAndNotify(this.#notification);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes('No published versions')) {
+        if (error.message.includes('No published versions') ||
+            error.message.includes('status 404') ||
+            error.message.includes('Cannot download')) {
           return null;
         }
       }
