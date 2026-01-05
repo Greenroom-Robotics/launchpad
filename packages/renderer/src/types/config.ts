@@ -21,53 +21,53 @@ export interface LaunchpadConfig {
 }
 
 export const applicationConfigSchema: ExtendedRJSFSchema = {
-  "type": "object",
-  "properties": {
-    "applications": {
-      "type": "array",
-      "title": "Application",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "ID",
-            "description": "Unique identifier for this application instance"
+  type: 'object',
+  properties: {
+    applications: {
+      type: 'array',
+      title: 'Application',
+      items: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            title: 'ID',
+            description: 'Unique identifier for this application instance',
           },
-          "name": {
-            "type": "string",
-            "title": "Display Name",
-            "description": "Name to show in the launcher"
+          name: {
+            type: 'string',
+            title: 'Display Name',
+            description: 'Name to show in the launcher',
           },
-          "type": {
-            "type": "string",
-            "title": "Application Type",
-            "enum": ["gama", "lookout", "marops", "missim"],
-            "enumNames": ["GAMA", "Lookout+", "MarOps", "MIS-SIM"]
+          type: {
+            type: 'string',
+            title: 'Application Type',
+            enum: ['gama', 'lookout', 'marops', 'missim'],
+            enumNames: ['GAMA', 'Lookout+', 'MarOps', 'MIS-SIM'],
           },
-          "url": {
-            "type": "string",
-            "format": "uri",
-            "title": "URL",
-            "description": "Full URL including protocol and port (e.g., http://localhost:3000)"
+          url: {
+            type: 'string',
+            format: 'uri',
+            title: 'URL',
+            description: 'Full URL including protocol and port (e.g., http://localhost:3000)',
           },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "description": "Optional description for this instance"
+          description: {
+            type: 'string',
+            title: 'Description',
+            description: 'Optional description for this instance',
           },
-          "enabled": {
-            "type": "boolean",
-            "title": "Enabled",
-            "default": true,
-            "description": "Whether this application should be shown in the launcher"
-          }
+          enabled: {
+            type: 'boolean',
+            title: 'Enabled',
+            default: true,
+            description: 'Whether this application should be shown in the launcher',
+          },
         },
-        "required": ["id", "name", "type", "url"]
-      }
-    }
+        required: ['id', 'name', 'type', 'url'],
+      },
+    },
   },
-  "required": ["applications"]
+  required: ['applications'],
 };
 
 export const defaultConfig: LaunchpadConfig = {
@@ -77,28 +77,28 @@ export const defaultConfig: LaunchpadConfig = {
       name: 'Local - GAMA',
       type: 'gama',
       url: 'http://localhost:3000',
-      enabled: true
+      enabled: true,
     },
     {
       id: 'local-lookout',
       name: 'Local - Lookout+',
       type: 'lookout',
       url: 'http://localhost:4000',
-      enabled: true
+      enabled: true,
     },
     {
       id: 'local-marops',
       name: 'Local - MarOps',
       type: 'marops',
       url: 'http://localhost:7000',
-      enabled: true
+      enabled: true,
     },
     {
       id: 'local-missim',
       name: 'Local - MIS-SIM',
       type: 'missim',
       url: 'http://localhost:5000',
-      enabled: true
-    }
-  ]
+      enabled: true,
+    },
+  ],
 };

@@ -5,10 +5,7 @@ import { TYPES } from '../types.js';
 
 @singleton()
 export class BackgroundOperationManager implements IInitializable {
-
-  constructor(
-    @inject(TYPES.ElectronApp) private app: Electron.App
-  ) { }
+  constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {}
 
   initialize(): void {
     // Instead of quitting when all windows are closed, keep the app running
@@ -21,8 +18,8 @@ export class BackgroundOperationManager implements IInitializable {
     // Handle the case where the app is activated (e.g., clicked on dock icon on macOS)
     this.app.on('activate', () => {
       // If there are no windows, this will be handled by the existing logic in WindowManager
-      const visibleWindows = BrowserWindow.getAllWindows().filter(window =>
-        window.isVisible() && !window.isDestroyed()
+      const visibleWindows = BrowserWindow.getAllWindows().filter(
+        (window) => window.isVisible() && !window.isDestroyed()
       );
 
       if (visibleWindows.length === 0) {

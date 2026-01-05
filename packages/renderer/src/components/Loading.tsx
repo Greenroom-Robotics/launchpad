@@ -16,7 +16,6 @@ const Outer = styled(Box)`
 
 const CustomSpinner = styled(Spinner)`
   animation-duration: 1000ms;
-
 `;
 
 interface ILoadingProps {
@@ -52,9 +51,7 @@ export const Loading = ({
       className={overlay ? 'overlay' : ''}
     >
       <Box>
-        <CustomSpinner
-          color="brand"
-        />
+        <CustomSpinner color="brand" />
       </Box>
       {label && <Text>{label}</Text>}
     </Outer>

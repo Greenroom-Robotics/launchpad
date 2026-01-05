@@ -6,9 +6,7 @@ import { TYPES } from '../types.js';
 export class HardwareAccelerationModule implements IInitializable {
   readonly #shouldBeDisabled: boolean;
 
-  constructor(
-    @inject(TYPES.ElectronApp) private app: Electron.App
-  ) {
+  constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {
     // Disable by default
     this.#shouldBeDisabled = true;
   }
@@ -19,4 +17,3 @@ export class HardwareAccelerationModule implements IInitializable {
     }
   }
 }
-

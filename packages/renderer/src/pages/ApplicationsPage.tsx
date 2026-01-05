@@ -1,17 +1,17 @@
-import { Box, Grid, Text } from 'grommet'
-import { Header } from '../components/layout/Header'
-import { ApplicationTile } from '../components/ApplicationTile'
-import { useConfig } from '../hooks/useConfig'
-import { useMemo } from 'react'
-import type { ApplicationInstance } from '../types/config'
-import { Link } from 'react-router'
+import { Box, Grid, Text } from 'grommet';
+import { Header } from '../components/layout/Header';
+import { ApplicationTile } from '../components/ApplicationTile';
+import { useConfig } from '../hooks/useConfig';
+import { useMemo } from 'react';
+import type { ApplicationInstance } from '../types/config';
+import { Link } from 'react-router';
 
 export const ApplicationsPage = () => {
   const { applications, isLoading, error, openApplication, checkConnectivity } = useConfig();
 
   // Use useMemo to optimize filtering of enabled applications
   const enabledApplications = useMemo(
-    () => applications.filter(app => app.enabled),
+    () => applications.filter((app) => app.enabled),
     [applications]
   );
 
@@ -49,11 +49,8 @@ export const ApplicationsPage = () => {
     <Box fill>
       <Header title="Launchpad - Apps" />
       <Box fill overflow="auto" pad="medium">
-        <Grid
-          columns={{ count: 'fill', size: 'medium' }}
-          gap="small"
-        >
-          {enabledApplications.map(app => (
+        <Grid columns={{ count: 'fill', size: 'medium' }} gap="small">
+          {enabledApplications.map((app) => (
             <ApplicationTile
               key={app.id}
               application={app}
@@ -62,13 +59,14 @@ export const ApplicationsPage = () => {
             />
           ))}
         </Grid>
-          {enabledApplications.length === 0 && (
-            <Box fill align="center" justify="center" height="medium">
-              <Text>No applications found. <Link to="/settings">Configure</Link> applications</Text>
-            </Box>
-          )  
-          }
+        {enabledApplications.length === 0 && (
+          <Box fill align="center" justify="center" height="medium">
+            <Text>
+              No applications found. <Link to="/settings">Configure</Link> applications
+            </Text>
+          </Box>
+        )}
       </Box>
     </Box>
-  )
-}
+  );
+};

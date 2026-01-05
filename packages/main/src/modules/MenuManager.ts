@@ -6,11 +6,10 @@ import { TYPES } from '../types.js';
 
 @singleton()
 export class MenuManager implements IInitializable {
-
   constructor(
     @inject(WindowManager) private windowManager: WindowManager,
     @inject(TYPES.ElectronApp) private app: Electron.App
-  ) { }
+  ) {}
 
   async initialize(): Promise<void> {
     await this.app.whenReady();
@@ -27,15 +26,15 @@ export class MenuManager implements IInitializable {
             accelerator: 'CmdOrCtrl+N',
             click: () => {
               this.createNewWindow();
-            }
+            },
           },
           { type: 'separator' },
           {
             label: 'Close',
             accelerator: 'CmdOrCtrl+W',
-            role: 'close'
-          }
-        ]
+            role: 'close',
+          },
+        ],
       },
       {
         label: 'Edit',
@@ -46,8 +45,8 @@ export class MenuManager implements IInitializable {
           { role: 'cut' },
           { role: 'copy' },
           { role: 'paste' },
-          { role: 'selectAll' }
-        ]
+          { role: 'selectAll' },
+        ],
       },
       {
         label: 'View',
@@ -60,16 +59,13 @@ export class MenuManager implements IInitializable {
           { role: 'zoomIn' },
           { role: 'zoomOut' },
           { type: 'separator' },
-          { role: 'togglefullscreen' }
-        ]
+          { role: 'togglefullscreen' },
+        ],
       },
       {
         label: 'Window',
-        submenu: [
-          { role: 'minimize' },
-          { role: 'close' }
-        ]
-      }
+        submenu: [{ role: 'minimize' }, { role: 'close' }],
+      },
     ];
 
     // On macOS, adjust the menu structure
@@ -85,8 +81,8 @@ export class MenuManager implements IInitializable {
           { role: 'hideOthers' },
           { role: 'unhide' },
           { type: 'separator' },
-          { role: 'quit' }
-        ]
+          { role: 'quit' },
+        ],
       });
 
       // macOS Window menu adjustments
@@ -95,7 +91,7 @@ export class MenuManager implements IInitializable {
         { role: 'minimize' },
         { role: 'zoom' },
         { type: 'separator' },
-        { role: 'front' }
+        { role: 'front' },
       ];
     }
 
@@ -118,7 +114,10 @@ export class MenuManager implements IInitializable {
     } else if (metadata.type === WINDOW_TYPES.APPLICATION) {
       // Create a new application window with the same URL and name
       if (metadata.applicationUrl && metadata.applicationName) {
-        this.windowManager.createNewApplicationWindow(metadata.applicationUrl, metadata.applicationName);
+        this.windowManager.createNewApplicationWindow(
+          metadata.applicationUrl,
+          metadata.applicationName
+        );
       }
     }
   }

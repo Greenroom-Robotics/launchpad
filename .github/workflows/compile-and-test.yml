@@ -26,6 +26,17 @@ env:
   npm_config_fund: false
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-app
+        name: Setup application
+        with:
+          node-version: '23'
+          api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
+      - run: npm run lint
+
   typecheck:
     runs-on: ubuntu-latest
     steps:
@@ -78,7 +89,7 @@ jobs:
 
       - uses: actions/attest-build-provenance@v3
         with:
-          subject-path: "dist/root*, dist/latest*.yml"
+          subject-path: 'dist/root*, dist/latest*.yml'
 
       - name: Upload compiled app
         uses: actions/upload-artifact@v6

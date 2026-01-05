@@ -83,7 +83,7 @@ jobs:
       - name: Download release artifacts
         uses: actions/download-artifact@v7
         with:
-          pattern: "*-release"
+          pattern: '*-release'
           path: dist
           merge-multiple: true
 

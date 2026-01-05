@@ -6,7 +6,6 @@ type DownloadNotification = Parameters<AppUpdater['checkForUpdatesAndNotify']>[0
 
 @singleton()
 export class AutoUpdater implements IInitializable {
-
   readonly #logger: Logger | null;
   readonly #notification: DownloadNotification;
 
@@ -39,8 +38,10 @@ export class AutoUpdater implements IInitializable {
       updater.fullChangelog = true;
 
       // Skip auto-updates for development channels or when running tests
-      if (import.meta.env.VITE_DISTRIBUTION_CHANNEL &&
-        import.meta.env.VITE_DISTRIBUTION_CHANNEL !== 'release') {
+      if (
+        import.meta.env.VITE_DISTRIBUTION_CHANNEL &&
+        import.meta.env.VITE_DISTRIBUTION_CHANNEL !== 'release'
+      ) {
         console.log('Skipping auto-updater for non-release channel');
         return null;
       }
@@ -52,9 +53,11 @@ export class AutoUpdater implements IInitializable {
       return await updater.checkForUpdatesAndNotify(this.#notification);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes('No published versions') ||
+        if (
+          error.message.includes('No published versions') ||
           error.message.includes('status 404') ||
-          error.message.includes('Cannot download')) {
+          error.message.includes('Cannot download')
+        ) {
           console.warn('AutoUpdater: No updates available or network error (ignored)');
           return null;
         }
@@ -65,4 +68,3 @@ export class AutoUpdater implements IInitializable {
     }
   }
 }
-

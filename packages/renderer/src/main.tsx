@@ -1,8 +1,8 @@
-import './index.css'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import './index.css';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { GlobalStyles } from '@greenroom-robotics/alpha.ui/build/theme';
-import { HashRouter } from "react-router";
+import { HashRouter } from 'react-router';
 import { App } from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(
@@ -12,5 +12,5 @@ createRoot(document.getElementById('root')!).render(
         <App />
       </HashRouter>
     </GlobalStyles>
-  </StrictMode>,
-)
+  </StrictMode>
+);

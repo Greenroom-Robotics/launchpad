@@ -9,7 +9,7 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - if: ${{ runner.os == 'Linux' }}
       shell: bash

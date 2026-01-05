@@ -6,10 +6,10 @@ import type { IInitializable } from '../interfaces.js';
 
 const WINDOW_TYPES = {
   LAUNCHPAD: 'launchpad',
-  APPLICATION: 'application'
+  APPLICATION: 'application',
 } as const;
 
-type WindowType = typeof WINDOW_TYPES[keyof typeof WINDOW_TYPES];
+type WindowType = (typeof WINDOW_TYPES)[keyof typeof WINDOW_TYPES];
 
 interface WindowMetadata {
   type: WindowType;
@@ -46,7 +46,7 @@ export class WindowManager implements IInitializable {
       width: 1200,
       height: 800,
       show: false, // Use the 'ready-to-show' event to show the instantiated BrowserWindow.
-      title: "Greenroom | Launchpad",
+      title: 'Greenroom | Launchpad',
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -58,7 +58,7 @@ export class WindowManager implements IInitializable {
 
     // Mark this as a Launchpad window
     this.#windowMetadata.set(browserWindow, {
-      type: WINDOW_TYPES.LAUNCHPAD
+      type: WINDOW_TYPES.LAUNCHPAD,
     });
 
     if (this.#renderer instanceof URL) {
@@ -71,7 +71,7 @@ export class WindowManager implements IInitializable {
   }
 
   async restoreOrCreateWindow(show = false) {
-    let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+    let window = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed());
 
     if (window === undefined) {
       window = await this.createWindow();
@@ -126,7 +126,7 @@ export class WindowManager implements IInitializable {
     this.#windowMetadata.set(browserWindow, {
       type: WINDOW_TYPES.APPLICATION,
       applicationName: applicationName,
-      applicationUrl: url
+      applicationUrl: url,
     });
 
     // Store window reference before loading
@@ -146,13 +146,16 @@ export class WindowManager implements IInitializable {
     });
 
     // Handle load errors
-    browserWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-      console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
-      // Show the window even on load failure so user can see the error
-      if (!browserWindow.isDestroyed()) {
-        browserWindow.show();
+    browserWindow.webContents.on(
+      'did-fail-load',
+      (event, errorCode, errorDescription, validatedURL) => {
+        console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+        // Show the window even on load failure so user can see the error
+        if (!browserWindow.isDestroyed()) {
+          browserWindow.show();
+        }
       }
-    });
+    );
 
     try {
       // Load the application URL
@@ -199,7 +202,7 @@ export class WindowManager implements IInitializable {
 
   showLaunchpadWindow(): void {
     // Find existing Launchpad window
-    const launchpadWindow = BrowserWindow.getAllWindows().find(window => {
+    const launchpadWindow = BrowserWindow.getAllWindows().find((window) => {
       const metadata = this.#windowMetadata.get(window);
       return metadata && metadata.type === WINDOW_TYPES.LAUNCHPAD && !window.isDestroyed();
     });
@@ -237,7 +240,7 @@ export class WindowManager implements IInitializable {
     this.#windowMetadata.set(browserWindow, {
       type: WINDOW_TYPES.APPLICATION,
       applicationName: applicationName,
-      applicationUrl: url
+      applicationUrl: url,
     });
 
     // Open dev tools if needed
@@ -246,9 +249,12 @@ export class WindowManager implements IInitializable {
     }
 
     // Handle load errors
-    browserWindow.webContents.on('did-fail-load', (_, errorCode, errorDescription, validatedURL) => {
-      console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
-    });
+    browserWindow.webContents.on(
+      'did-fail-load',
+      (_, errorCode, errorDescription, validatedURL) => {
+        console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+      }
+    );
 
     try {
       // Load the application URL
@@ -259,7 +265,6 @@ export class WindowManager implements IInitializable {
 
     return browserWindow;
   }
-
 }
 
 export { WINDOW_TYPES };

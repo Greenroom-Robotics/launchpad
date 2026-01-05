@@ -1,21 +1,23 @@
-
-import { Box, Text } from 'grommet'
-import { Header } from '../components/layout/Header'
-import { SchemaForm } from '@greenroom-robotics/alpha.schema-form'
-import { applicationConfigSchema } from '../types/config'
-import type { LaunchpadConfig } from '../types/config'
-import { useConfig } from '../hooks/useConfig'
-import { useAsyncFn } from 'react-use'
+import { Box, Text } from 'grommet';
+import { Header } from '../components/layout/Header';
+import { SchemaForm } from '@greenroom-robotics/alpha.schema-form';
+import { applicationConfigSchema } from '../types/config';
+import type { LaunchpadConfig } from '../types/config';
+import { useConfig } from '../hooks/useConfig';
+import { useAsyncFn } from 'react-use';
 
 export const SettingsPage = () => {
   const { applications, isLoading, error, updateConfig } = useConfig();
 
   // Use useAsyncFn for form submission with built-in loading/error states
-  const [submitState, handleSubmit] = useAsyncFn(async (data: LaunchpadConfig) => {
-    await updateConfig(data);
-    console.log("Configuration saved successfully");
-    return data;
-  }, [updateConfig]);
+  const [submitState, handleSubmit] = useAsyncFn(
+    async (data: LaunchpadConfig) => {
+      await updateConfig(data);
+      console.log('Configuration saved successfully');
+      return data;
+    },
+    [updateConfig]
+  );
 
   if (isLoading) {
     return (
@@ -45,20 +47,20 @@ export const SettingsPage = () => {
   return (
     <Box fill>
       <Header title="Launchpad - Settings" />
-      <Box margin={{ horizontal: "medium", bottom: "medium" }} overflow="auto">
+      <Box margin={{ horizontal: 'medium', bottom: 'medium' }} overflow="auto">
         {/* Show save status */}
         {isSaving && (
-          <Box pad="small" background="status-unknown" margin={{ bottom: "small" }}>
+          <Box pad="small" background="status-unknown" margin={{ bottom: 'small' }}>
             <Text color="white">Saving configuration...</Text>
           </Box>
         )}
         {submitError && (
-          <Box pad="small" background="status-error" margin={{ bottom: "small" }}>
+          <Box pad="small" background="status-error" margin={{ bottom: 'small' }}>
             <Text color="white">Error saving: {submitError.message}</Text>
           </Box>
         )}
         {savedConfig && !isSaving && !submitError && (
-          <Box pad="small" background="status-ok" margin={{ bottom: "small" }}>
+          <Box pad="small" background="status-ok" margin={{ bottom: 'small' }}>
             <Text color="white">Configuration saved successfully!</Text>
           </Box>
         )}
@@ -66,16 +68,15 @@ export const SettingsPage = () => {
         <SchemaForm
           schema={applicationConfigSchema}
           uiSchema={{
-              'applications': {
-                'items': {
-                  'ui:options': {
-                    numColumns: 2,
-                    defaultCollapsed: true,
-                    titleFieldPath: 'id',
-                  },
+            applications: {
+              items: {
+                'ui:options': {
+                  numColumns: 2,
+                  defaultCollapsed: true,
+                  titleFieldPath: 'id',
                 },
-
-            }
+              },
+            },
           }}
           formData={currentConfig}
           onSubmit={handleSubmit}
@@ -83,5 +84,5 @@ export const SettingsPage = () => {
         />
       </Box>
     </Box>
-  )
-}
+  );
+};

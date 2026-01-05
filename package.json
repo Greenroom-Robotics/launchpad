@@ -22,20 +22,25 @@
     "test": "npx playwright test ./tests/e2e.spec.ts",
     "start": "node packages/dev-mode.js",
     "typecheck": "npm run typecheck -ws --if-present",
-    "create-renderer": "cd packages && node ./integrate-renderer/create-renderer.js",
-    "integrate-renderer": "npm start --workspace @app/integrate-renderer",
-    "init": "npm run create-renderer && npm run integrate-renderer && npm install",
+    "lint": "npm run lint -ws --if-present && prettier --check .",
+    "format": "prettier --write .",
     "generate-icons": "inkscape buildResources/icon.svg --export-type=png --export-filename=buildResources/icon-1024.png --export-width=1024 --export-height=1024 --export-background-opacity=0 && npx electron-icon-builder --input=buildResources/icon-1024.png --output=buildResources --flatten && mv buildResources/icons/* buildResources/ && rmdir buildResources/icons"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@npmcli/map-workspaces": "5.0.3",
     "@playwright/test": "1.57.0",
     "@types/node": "25.0.3",
     "create-vite": "8.2.0",
     "electron": "39.2.7",
     "electron-builder": "26.0.12",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
     "glob": "13.0.0",
-    "playwright": "^1.57.0"
+    "globals": "^17.0.0",
+    "playwright": "^1.57.0",
+    "prettier": "^3.7.4",
+    "typescript-eslint": "^8.51.0"
   },
   "dependencies": {
     "@app/main": "*"

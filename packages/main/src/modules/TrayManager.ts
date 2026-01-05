@@ -11,7 +11,7 @@ export class TrayManager implements IInitializable {
   constructor(
     @inject(WindowManager) private windowManager: WindowManager,
     @inject(TYPES.ElectronApp) private app: Electron.App
-  ) { }
+  ) {}
 
   async initialize(): Promise<void> {
     await this.app.whenReady();
@@ -20,7 +20,8 @@ export class TrayManager implements IInitializable {
 
   private setupSystemTray(): void {
     // Create tray icon from embedded base64 data (cross-platform reliable)
-    const iconDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACaUlEQVR4AXXB32vVdRzH8efrfdZQmM2dtiSItIN4GLKdmgjSjTG7iaLMQLoo88YNRsEqifoDpF83gt2cOSzKBkUlYlBUKy8HSZrIvsdIXdgPxLWNLHfMz/f97gRCp2/1eIii57fUMI1gGsaoIAniAnlMk0edV2a+oY24QeObV4RpP9IeTA2M95EyDMjZQPJHSF5T8gn+8Gfi4MllWkSLxjatxPQxplpIT/HDr1N80Ajajd+Dms1HaeZ1ruVnaPr9cWR2uUSLhm57HbgP4l4OnPiMbJ5/mbkIJ37OVO07pt+vv6ir6Y44v/BRSbtrdwETOKNR//pT/ofGN5fZcnsX3Z3f6+Jvc6R4SZXy0Q48RggaWPNt/oPGhh7EbB95DMognPNeXb3PZhdn8RjpIMU2FO/FO42gQHvu3kXiTeSHKek5giTiYW6yiViz8hddWt7WQfJ1SBkF2jXYRfL9SK/GoVMv8LfjGtv0I70rXmPxWo+RApIHRR7DpFhF8pcpuu518nBu7sSUfE7JN1CUopfkV+Kt00sUxMGTV8hjKTptzkj+JSm22wNV/iF5Rooe7dy4kQI9MbiK5N2UbNrIfZLca3jsoF0wQ/KvSDGpHf09tPN4jOQGUS/FuYWftK5cIXhW68vH4tzCPH/JLmPV3mlFjIL2qr9vvfpvzTTQtwZniuBwTJ2ZLNGiO1d/jvMQob2qlL9jbXfG3BJxdn5R1VsOyeOSgneJGAA+JMiAx5m9nMQNtrXShTiA9CTiNNIRxFlMYPRj2o40gPFGmJ6Oo42rtIgC21oZAkYRw0hrMQLpAqYvME34J9+eos2flF0XiroPfWwAAAAASUVORK5CYII=';
+    const iconDataUrl =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACaUlEQVR4AXXB32vVdRzH8efrfdZQmM2dtiSItIN4GLKdmgjSjTG7iaLMQLoo88YNRsEqifoDpF83gt2cOSzKBkUlYlBUKy8HSZrIvsdIXdgPxLWNLHfMz/f97gRCp2/1eIii57fUMI1gGsaoIAniAnlMk0edV2a+oY24QeObV4RpP9IeTA2M95EyDMjZQPJHSF5T8gn+8Gfi4MllWkSLxjatxPQxplpIT/HDr1N80Ajajd+Dms1HaeZ1ruVnaPr9cWR2uUSLhm57HbgP4l4OnPiMbJ5/mbkIJ37OVO07pt+vv6ir6Y44v/BRSbtrdwETOKNR//pT/ofGN5fZcnsX3Z3f6+Jvc6R4SZXy0Q48RggaWPNt/oPGhh7EbB95DMognPNeXb3PZhdn8RjpIMU2FO/FO42gQHvu3kXiTeSHKek5giTiYW6yiViz8hddWt7WQfJ1SBkF2jXYRfL9SK/GoVMv8LfjGtv0I70rXmPxWo+RApIHRR7DpFhF8pcpuu518nBu7sSUfE7JN1CUopfkV+Kt00sUxMGTV8hjKTptzkj+JSm22wNV/iF5Rooe7dy4kQI9MbiK5N2UbNrIfZLca3jsoF0wQ/KvSDGpHf09tPN4jOQGUS/FuYWftK5cIXhW68vH4tzCPH/JLmPV3mlFjIL2qr9vvfpvzTTQtwZniuBwTJ2ZLNGiO1d/jvMQob2qlL9jbXfG3BJxdn5R1VsOyeOSgneJGAA+JMiAx5m9nMQNtrXShTiA9CTiNNIRxFlMYPRj2o40gPFGmJ6Oo42rtIgC21oZAkYRw0hrMQLpAqYvME34J9+eos2flF0XiroPfWwAAAAASUVORK5CYII=';
     const icon = nativeImage.createFromDataURL(iconDataUrl);
 
     if (icon.isEmpty()) {
@@ -36,17 +37,17 @@ export class TrayManager implements IInitializable {
         label: 'Open Greenroom Launchpad',
         click: () => {
           this.showLaunchpadWindow();
-        }
+        },
       },
       {
-        type: 'separator'
+        type: 'separator',
       },
       {
         label: 'Quit',
         click: () => {
           app.quit();
-        }
-      }
+        },
+      },
     ]);
 
     this.#tray.setContextMenu(contextMenu);

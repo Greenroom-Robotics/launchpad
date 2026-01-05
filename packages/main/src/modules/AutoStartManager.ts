@@ -13,9 +13,7 @@ interface AutoStartOptions {
 export class AutoStartManager implements IInitializable {
   readonly #options: AutoStartOptions;
 
-  constructor(
-    @inject(TYPES.ElectronApp) private app: Electron.App
-  ) {
+  constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {
     this.#options = {
       enabled: true,
       openAtLogin: true,
@@ -40,7 +38,7 @@ export class AutoStartManager implements IInitializable {
       openAtLogin: true,
       openAsHidden: this.#options.openAsHidden ?? true,
       name: 'Greenroom Launchpad',
-      path: process.execPath
+      path: process.execPath,
     });
 
     console.log('AutoStartManager: Configured app to start at login');
@@ -49,7 +47,7 @@ export class AutoStartManager implements IInitializable {
   // Method to disable auto-start (can be called from settings)
   disableAutoStart(): void {
     app.setLoginItemSettings({
-      openAtLogin: false
+      openAtLogin: false,
     });
     console.log('AutoStartManager: Disabled auto-start');
   }
@@ -60,7 +58,7 @@ export class AutoStartManager implements IInitializable {
       openAtLogin: true,
       openAsHidden: openAsHidden,
       name: 'Greenroom Launchpad',
-      path: process.execPath
+      path: process.execPath,
     });
     console.log('AutoStartManager: Enabled auto-start');
   }

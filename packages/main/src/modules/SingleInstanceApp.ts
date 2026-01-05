@@ -5,10 +5,7 @@ import { TYPES } from '../types.js';
 
 @singleton()
 export class SingleInstanceApp implements IInitializable {
-
-  constructor(
-    @inject(TYPES.ElectronApp) private app: Electron.App
-  ) { }
+  constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {}
 
   initialize(): void {
     const isSingleInstance = this.app.requestSingleInstanceLock();
@@ -18,4 +15,3 @@ export class SingleInstanceApp implements IInitializable {
     }
   }
 }
-

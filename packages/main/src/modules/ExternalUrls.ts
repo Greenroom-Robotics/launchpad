@@ -6,7 +6,6 @@ import { TYPES } from '../types.js';
 
 @singleton()
 export class ExternalUrls implements IInitializable {
-
   readonly #externalUrls: Set<string>;
 
   constructor(
@@ -33,4 +32,3 @@ export class ExternalUrls implements IInitializable {
     });
   }
 }
-

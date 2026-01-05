@@ -10,9 +10,7 @@ import type { IInitializable } from '../interfaces.js';
 export class ConfigurationManager implements IInitializable {
   private store: Store<LaunchpadConfig>;
 
-  constructor(
-    @inject(WindowManager) private windowManager: WindowManager
-  ) {
+  constructor(@inject(WindowManager) private windowManager: WindowManager) {
     this.store = new Store<LaunchpadConfig>({
       name: 'launchpad-config',
       defaults: defaultConfig,
@@ -26,16 +24,16 @@ export class ConfigurationManager implements IInitializable {
               name: { type: 'string' },
               type: {
                 type: 'string',
-                enum: ['gama', 'lookout', 'marops', 'missim']
+                enum: ['gama', 'lookout', 'marops', 'missim'],
               },
               url: { type: 'string' },
               description: { type: 'string' },
-              enabled: { type: 'boolean' }
+              enabled: { type: 'boolean' },
             },
-            required: ['id', 'name', 'type', 'url', 'enabled']
-          }
-        }
-      }
+            required: ['id', 'name', 'type', 'url', 'enabled'],
+          },
+        },
+      },
     });
   }
 
@@ -62,11 +60,14 @@ export class ConfigurationManager implements IInitializable {
     });
 
     // Handle opening application URLs in new Electron windows
-    ipcMain.handle('app:openApplication', async (_, { url, name }: { url: string; name: string }) => {
-      await this.windowManager.createApplicationWindow(url, name);
-      // Return simple success response instead of the BrowserWindow object
-      return { success: true, url, name };
-    });
+    ipcMain.handle(
+      'app:openApplication',
+      async (_, { url, name }: { url: string; name: string }) => {
+        await this.windowManager.createApplicationWindow(url, name);
+        // Return simple success response instead of the BrowserWindow object
+        return { success: true, url, name };
+      }
+    );
 
     // Handle connectivity checking
     ipcMain.handle('app:checkConnectivity', async (_, url: string) => {
@@ -84,7 +85,7 @@ export class ConfigurationManager implements IInitializable {
 
   getConfig(): LaunchpadConfig {
     return {
-      applications: this.getApplications()
+      applications: this.getApplications(),
     };
   }
 
@@ -130,9 +131,8 @@ export class ConfigurationManager implements IInitializable {
     } catch (error) {
       return {
         connected: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
-
 }

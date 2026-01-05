@@ -1,10 +1,10 @@
-import type {ElectronApplication, JSHandle} from 'playwright';
-import {_electron as electron} from 'playwright';
-import {expect, test as base} from '@playwright/test';
-import type {BrowserWindow} from 'electron';
-import {globSync} from 'glob';
-import {platform} from 'node:process';
-import {createHash} from 'node:crypto';
+import type { ElectronApplication, JSHandle } from 'playwright';
+import { _electron as electron } from 'playwright';
+import { expect, test as base } from '@playwright/test';
+import type { BrowserWindow } from 'electron';
+import { globSync } from 'glob';
+import { platform } from 'node:process';
+import { createHash } from 'node:crypto';
 
 process.env.PLAYWRIGHT_TEST = 'true';
 
@@ -15,44 +15,47 @@ type TestFixtures = {
 };
 
 const test = base.extend<TestFixtures>({
-  electronApp: [async ({}, use) => {
-
-    /**
-     * Executable path depends on platform and product name!
-     */
-    let executablePattern: string;
-    if (platform === 'darwin') {
-      executablePattern = 'dist/mac*/**/Greenroom Launchpad.app/Contents/MacOS/Greenroom Launchpad';
-    } else if (platform === 'win32') {
-      executablePattern = 'dist/win*/**/Greenroom Launchpad.exe';
-    } else {
-      // Linux and other platforms
-      executablePattern = 'dist/linux*/**/greenroom-launchpad';
-    }
-
-    const [executablePath] = globSync(executablePattern);
-    if (!executablePath) {
-      throw new Error('App Executable path not found');
-    }
-
-    const electronApp = await electron.launch({
-      executablePath: executablePath,
-      args: ['--no-sandbox'],
-    });
-
-    electronApp.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        console.error(`[electron][${msg.type()}] ${msg.text()}`);
+  electronApp: [
+    async ({}, use) => {
+      /**
+       * Executable path depends on platform and product name!
+       */
+      let executablePattern: string;
+      if (platform === 'darwin') {
+        executablePattern =
+          'dist/mac*/**/Greenroom Launchpad.app/Contents/MacOS/Greenroom Launchpad';
+      } else if (platform === 'win32') {
+        executablePattern = 'dist/win*/**/Greenroom Launchpad.exe';
+      } else {
+        // Linux and other platforms
+        executablePattern = 'dist/linux*/**/greenroom-launchpad';
       }
-    });
 
-    await use(electronApp);
+      const [executablePath] = globSync(executablePattern);
+      if (!executablePath) {
+        throw new Error('App Executable path not found');
+      }
 
-    // This code runs after all the tests in the worker process.
-    await electronApp.close();
-  }, {scope: 'worker', auto: true} as any],
+      const electronApp = await electron.launch({
+        executablePath: executablePath,
+        args: ['--no-sandbox'],
+      });
 
-  page: async ({electronApp}, use) => {
+      electronApp.on('console', (msg) => {
+        if (msg.type() === 'error') {
+          console.error(`[electron][${msg.type()}] ${msg.text()}`);
+        }
+      });
+
+      await use(electronApp);
+
+      // This code runs after all the tests in the worker process.
+      await electronApp.close();
+    },
+    { scope: 'worker', auto: true } as any,
+  ],
+
+  page: async ({ electronApp }, use) => {
     const page = await electronApp.firstWindow();
     // capture errors
     page.on('pageerror', (error) => {
@@ -67,23 +70,24 @@ const test = base.extend<TestFixtures>({
     await use(page);
   },
 
-  electronVersions: async ({electronApp}, use) => {
+  electronVersions: async ({ electronApp }, use) => {
     await use(await electronApp.evaluate(() => process.versions));
   },
 });
 
-
-test('Main window state', async ({electronApp, page}) => {
+test('Main window state', async ({ electronApp, page }) => {
   const window: JSHandle<BrowserWindow> = await electronApp.browserWindow(page);
   const windowState = await window.evaluate(
-    (mainWindow): Promise<{isVisible: boolean; isDevToolsOpened: boolean; isCrashed: boolean}> => {
+    (
+      mainWindow
+    ): Promise<{ isVisible: boolean; isDevToolsOpened: boolean; isCrashed: boolean }> => {
       const getState = () => ({
         isVisible: mainWindow.isVisible(),
         isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
         isCrashed: mainWindow.webContents.isCrashed(),
       });
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         /**
          * The main window is created hidden, and is shown only when it is ready.
          * See {@link ../packages/main/src/mainWindow.ts} function
@@ -94,7 +98,7 @@ test('Main window state', async ({electronApp, page}) => {
           mainWindow.once('ready-to-show', () => resolve(getState()));
         }
       });
-    },
+    }
   );
 
   expect(windowState.isCrashed, 'The app has crashed').toEqual(false);
@@ -103,34 +107,32 @@ test('Main window state', async ({electronApp, page}) => {
 });
 
 test.describe('Main window web content', async () => {
-
-  test('The main window shows Launchpad - Apps', async ({page}) => {
+  test('The main window shows Launchpad - Apps', async ({ page }) => {
     const element = page.getByText('Launchpad - Apps');
     await expect(element).toBeVisible();
   });
-
 });
 
 test.describe('Preload context should be exposed', async () => {
   test.describe(`versions should be exposed`, async () => {
-    test('with same type`', async ({page}) => {
+    test('with same type`', async ({ page }) => {
       const type = await page.evaluate(() => typeof globalThis[btoa('versions')]);
       expect(type).toEqual('object');
     });
 
-    test('with same value', async ({page, electronVersions}) => {
+    test('with same value', async ({ page, electronVersions }) => {
       const value = await page.evaluate(() => globalThis[btoa('versions')]);
       expect(value).toEqual(electronVersions);
     });
   });
 
   test.describe(`sha256sum should be exposed`, async () => {
-    test('with same type`', async ({page}) => {
+    test('with same type`', async ({ page }) => {
       const type = await page.evaluate(() => typeof globalThis[btoa('sha256sum')]);
       expect(type).toEqual('function');
     });
 
-    test('with same behavior', async ({page}) => {
+    test('with same behavior', async ({ page }) => {
       const testString = btoa(`${Date.now() * Math.random()}`);
       const expectedValue = createHash('sha256').update(testString).digest('hex');
       const value = await page.evaluate((str) => globalThis[btoa('sha256sum')](str), testString);
@@ -139,19 +141,22 @@ test.describe('Preload context should be exposed', async () => {
   });
 
   test.describe(`send should be exposed`, async () => {
-    test('with same type`', async ({page}) => {
+    test('with same type`', async ({ page }) => {
       const type = await page.evaluate(() => typeof globalThis[btoa('send')]);
       expect(type).toEqual('function');
     });
 
-    test('with same behavior', async ({page, electronApp}) => {
-      await electronApp.evaluate(async ({ipcMain}) => {
+    test('with same behavior', async ({ page, electronApp }) => {
+      await electronApp.evaluate(async ({ ipcMain }) => {
         ipcMain.handle('test', (_, message) => btoa(message));
       });
 
       const testString = btoa(`${Date.now() * Math.random()}`);
       const expectedValue = btoa(testString);
-      const value = await page.evaluate(async (str) => await globalThis[btoa('send')]('test', str), testString);
+      const value = await page.evaluate(
+        async (str) => await globalThis[btoa('send')]('test', str),
+        testString
+      );
       expect(value).toEqual(expectedValue);
     });
   });

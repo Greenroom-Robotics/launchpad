@@ -18,9 +18,9 @@ export class BlockNotAllowedOrigins implements IInitializable {
 
   constructor(
     @inject(TYPES.ElectronApp) private app: Electron.App,
-    allowedOrigins: Set<string> = new Set
+    allowedOrigins: Set<string> = new Set()
   ) {
-    this.#allowedOrigins = structuredClone(allowedOrigins)
+    this.#allowedOrigins = structuredClone(allowedOrigins);
   }
 
   initialize(): void {
@@ -28,7 +28,6 @@ export class BlockNotAllowedOrigins implements IInitializable {
   }
 
   private applyRule(contents: Electron.WebContents): void {
-
     contents.on('will-navigate', (event, url) => {
       const { origin } = new URL(url);
       if (this.#allowedOrigins.has(origin)) {
@@ -44,4 +43,3 @@ export class BlockNotAllowedOrigins implements IInitializable {
     });
   }
 }
-

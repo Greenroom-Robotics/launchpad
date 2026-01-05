@@ -25,16 +25,16 @@ export async function initApp(initConfig: AppInitConfig) {
   const externalUrls = new Set(
     initConfig.renderer instanceof URL
       ? [
-        'https://vite.dev',
-        'https://developer.mozilla.org',
-        'https://solidjs.com',
-        'https://qwik.dev',
-        'https://lit.dev',
-        'https://react.dev',
-        'https://preactjs.com',
-        'https://www.typescriptlang.org',
-        'https://vuejs.org',
-      ]
+          'https://vite.dev',
+          'https://developer.mozilla.org',
+          'https://solidjs.com',
+          'https://qwik.dev',
+          'https://lit.dev',
+          'https://react.dev',
+          'https://preactjs.com',
+          'https://www.typescriptlang.org',
+          'https://vuejs.org',
+        ]
       : []
   );
 
@@ -42,7 +42,9 @@ export async function initApp(initConfig: AppInitConfig) {
   const app = container.resolve<Electron.App>('ElectronApp');
 
   // Register security services manually since they need runtime args
-  container.register(BlockNotAllowedOrigins, { useValue: new BlockNotAllowedOrigins(app, allowedOrigins) });
+  container.register(BlockNotAllowedOrigins, {
+    useValue: new BlockNotAllowedOrigins(app, allowedOrigins),
+  });
   container.register(ExternalUrls, { useValue: new ExternalUrls(app, externalUrls) });
 
   // Initialize services that need to run before app is ready

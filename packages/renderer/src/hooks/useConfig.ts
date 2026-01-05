@@ -31,7 +31,7 @@ function getElectronAPI() {
 
     return {
       config: window[configKey] as ElectronConfigAPI | undefined,
-      app: window[appKey] as ElectronAppAPI | undefined
+      app: window[appKey] as ElectronAppAPI | undefined,
     };
   } catch (error) {
     console.warn('Electron APIs not available:', error);
@@ -59,26 +59,32 @@ export function useConfig() {
   });
 
   // Use useAsyncFn for updating applications
-  const [, updateApplications] = useAsyncFn(async (newApplications: ApplicationInstance[]) => {
-    if (!config) {
-      throw new Error('Configuration API not available');
-    }
+  const [, updateApplications] = useAsyncFn(
+    async (newApplications: ApplicationInstance[]) => {
+      if (!config) {
+        throw new Error('Configuration API not available');
+      }
 
-    await config.setApplications(newApplications);
-    setApplications(newApplications);
-    return newApplications;
-  }, [config]);
+      await config.setApplications(newApplications);
+      setApplications(newApplications);
+      return newApplications;
+    },
+    [config]
+  );
 
   // Use useAsyncFn for updating config
-  const [, updateConfig] = useAsyncFn(async (newConfig: LaunchpadConfig) => {
-    if (!config) {
-      throw new Error('Configuration API not available');
-    }
+  const [, updateConfig] = useAsyncFn(
+    async (newConfig: LaunchpadConfig) => {
+      if (!config) {
+        throw new Error('Configuration API not available');
+      }
 
-    await config.setConfig(newConfig);
-    setApplications(newConfig.applications);
-    return newConfig;
-  }, [config]);
+      await config.setConfig(newConfig);
+      setApplications(newConfig.applications);
+      return newConfig;
+    },
+    [config]
+  );
 
   // Use useAsyncFn for resetting to default
   const [, resetToDefault] = useAsyncFn(async () => {
@@ -92,27 +98,33 @@ export function useConfig() {
   }, [config]);
 
   // Use useAsyncFn for opening applications
-  const [, openApplication] = useAsyncFn(async (url: string, name: string) => {
-    if (!app) {
-      throw new Error('Application API not available');
-    }
+  const [, openApplication] = useAsyncFn(
+    async (url: string, name: string) => {
+      if (!app) {
+        throw new Error('Application API not available');
+      }
 
-    await app.openApplication(url, name);
-  }, [app]);
+      await app.openApplication(url, name);
+    },
+    [app]
+  );
 
   // Use useAsyncFn for connectivity checking
-  const [, checkConnectivity] = useAsyncFn(async (url: string) => {
-    if (!app) {
-      return { connected: false, error: 'Application API not available' };
-    }
+  const [, checkConnectivity] = useAsyncFn(
+    async (url: string) => {
+      if (!app) {
+        return { connected: false, error: 'Application API not available' };
+      }
 
-    try {
-      return await app.checkConnectivity(url);
-    } catch (err) {
-      console.error('Failed to check connectivity:', err);
-      return { connected: false, error: err instanceof Error ? err.message : 'Unknown error' };
-    }
-  }, [app]);
+      try {
+        return await app.checkConnectivity(url);
+      } catch (err) {
+        console.error('Failed to check connectivity:', err);
+        return { connected: false, error: err instanceof Error ? err.message : 'Unknown error' };
+      }
+    },
+    [app]
+  );
 
   // Extract loading and error states from the loadState
   const { loading: isLoading, error } = loadState;
@@ -125,6 +137,6 @@ export function useConfig() {
     updateConfig,
     resetToDefault,
     openApplication,
-    checkConnectivity
+    checkConnectivity,
   };
 }

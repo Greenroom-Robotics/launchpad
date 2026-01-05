@@ -35,8 +35,8 @@ Initially, the repository contains only a few packages.
 
 ### Packages with building tools:
 
-- [`packages/integrate-renderer`](packages/integrate-renderer) - A helper package that is not included in the runtime.
-  It is used in `npm run init` to configure a new interface package.
+It is used in `npm run init` to configure a new interface package.
+
 - [`packages/electron-versions`](packages/electron-versions) - A set of helper functions to get the versions of internal components bundled within Electron.
 
 ### Packages with app logic:
@@ -73,7 +73,6 @@ Official releases are created using a tag-based workflow. See [RELEASE.md](RELEA
 - Publishing releases
 - Troubleshooting release issues
 
-
 ### Working with third-party dependencies
 
 Because the `renderer` works and builds like a _regular web application_, you can only use dependencies that support the
@@ -102,16 +101,16 @@ so you don't need to worry about it.
 
 ```ts
 // preload/src/index.ts
-import {readFile} from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
 // Encapsulate types if you use typescript
 interface UserData {
-  prop: string
+  prop: string;
 }
 
 // Will call `electron.contextBridge.exposeInMainWorld('getUserData', getUserData)`
 export function getUserData(): Promise<UserData> {
-  return readFile('/path/to/file/in/user/filesystem.json', {encoding: 'utf8'}).then(JSON.parse);
+  return readFile('/path/to/file/in/user/filesystem.json', { encoding: 'utf8' }).then(JSON.parse);
 }
 ```
 
@@ -119,11 +118,11 @@ Now you can import and call the method in renderer
 
 ```ts
 // renderer/src/anywhere/component.ts
-import {getUserData} from '@app/preload'
+import { getUserData } from '@app/preload';
 
 // Method will came from exposed context
 // const userData = globalThis['getUserData']
-const userData = await getUserData()
+const userData = await getUserData();
 ```
 
 > [!TIP]
@@ -208,67 +207,58 @@ will not.
 ```sh
 npm start
 ```
+
 Start application in development more with hot-reload.
 
 ---
+
 ```sh
 npm run build
 ```
+
 Runs the `build` command in all workspaces if present.
 
 ---
+
 ```sh
 npm run compile
 ```
+
 First runs the `build` script,
 then compiles the project into executable using `electron-builder` with the specified configuration.
 
 ---
+
 ```sh
 npm run compile -- --dir -c.asar=false
 ```
+
 Same as `npm run compile` but passes additional parameters to disable archive packaging and installer creation.
 Useful for debugging the compiled application.
 
 ---
+
 ```sh
 npm run test
 ```
+
 Executes end-to-end tests on **compiled app** using Playwright.
 
 ---
+
 ```sh
 npm run typecheck
 ```
+
 Runs the `typecheck` command in all workspaces if present.
 
 ---
-```sh
-npm run create-renderer
-```
-Initializes a new Vite project named `renderer`. Basically same as `npm create vite`.
-
----
-```sh
-npm run integrate-renderer
-```
-Starts the integration process of the renderer using the Vite Electron builder.
-
----
-```sh
-npm run init
-```
-Set up the initial environment by creating a new renderer, integrating it, and installing the necessary packages.
 
 ## Development
 
 This project uses a monorepo structure with independent packages. Each package can have its own dependencies, tests, and build processes. See the individual package README files for specific development instructions.
 
-
 [vite]: https://github.com/vitejs/vite/
-
 [electron]: https://github.com/electron/electron
-
 [electron-builder]: https://github.com/electron-userland/electron-builder
-
 [playwright]: https://playwright.dev
