@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAsyncFn, useMount } from 'react-use';
 import type { ApplicationInstance, LaunchpadConfig } from '../types/config';
 
 // Access the electron APIs through the exposed global
@@ -17,7 +18,8 @@ interface ElectronConfigAPI {
 }
 
 interface ElectronAppAPI {
-  openApplication: (url: string) => Promise<void>;
+  openApplication: (url: string, name: string) => Promise<void>;
+  checkConnectivity: (url: string) => Promise<{ connected: boolean; error?: string }>;
 }
 
 // Helper to decode base64 encoded property names and get the exposed APIs
@@ -39,96 +41,90 @@ function getElectronAPI() {
 
 export function useConfig() {
   const [applications, setApplications] = useState<ApplicationInstance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const { config, app } = getElectronAPI();
 
-  // Load configuration on mount
-  useEffect(() => {
+  // Use useAsyncFn for loading applications with built-in state management
+  const [loadState, loadApplications] = useAsyncFn(async () => {
     if (!config) {
-      setError('Configuration API not available');
-      setIsLoading(false);
-      return;
+      throw new Error('Configuration API not available');
     }
-
-    const loadConfig = async () => {
-      try {
-        const apps = await config!.getApplications();
-        setApplications(apps);
-      } catch (err) {
-        console.error('Failed to load configuration:', err);
-        setError('Failed to load configuration');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadConfig();
+    const apps = await config.getApplications();
+    setApplications(apps);
+    return apps;
   }, [config]);
 
-  const updateApplications = async (newApplications: ApplicationInstance[]) => {
+  // Load configuration on mount
+  useMount(() => {
+    loadApplications();
+  });
+
+  // Use useAsyncFn for updating applications
+  const [, updateApplications] = useAsyncFn(async (newApplications: ApplicationInstance[]) => {
     if (!config) {
       throw new Error('Configuration API not available');
     }
 
-    try {
-      await config!.setApplications(newApplications);
-      setApplications(newApplications);
-    } catch (err) {
-      console.error('Failed to update applications:', err);
-      throw err;
-    }
-  };
+    await config.setApplications(newApplications);
+    setApplications(newApplications);
+    return newApplications;
+  }, [config]);
 
-  const updateConfig = async (newConfig: LaunchpadConfig) => {
+  // Use useAsyncFn for updating config
+  const [, updateConfig] = useAsyncFn(async (newConfig: LaunchpadConfig) => {
     if (!config) {
       throw new Error('Configuration API not available');
     }
 
-    try {
-      await config!.setConfig(newConfig);
-      setApplications(newConfig.applications);
-    } catch (err) {
-      console.error('Failed to update configuration:', err);
-      throw err;
-    }
-  };
+    await config.setConfig(newConfig);
+    setApplications(newConfig.applications);
+    return newConfig;
+  }, [config]);
 
-  const resetToDefault = async () => {
+  // Use useAsyncFn for resetting to default
+  const [, resetToDefault] = useAsyncFn(async () => {
     if (!config) {
       throw new Error('Configuration API not available');
     }
 
-    try {
-      const defaultConfig = await config!.resetToDefault();
-      setApplications(defaultConfig.applications);
-    } catch (err) {
-      console.error('Failed to reset configuration:', err);
-      throw err;
-    }
-  };
+    const defaultConfig = await config.resetToDefault();
+    setApplications(defaultConfig.applications);
+    return defaultConfig;
+  }, [config]);
 
-  const openApplication = async (url: string) => {
+  // Use useAsyncFn for opening applications
+  const [, openApplication] = useAsyncFn(async (url: string, name: string) => {
     if (!app) {
       throw new Error('Application API not available');
     }
 
-    try {
-      await app!.openApplication(url);
-    } catch (err) {
-      console.error('Failed to open application:', err);
-      throw err;
+    await app.openApplication(url, name);
+  }, [app]);
+
+  // Use useAsyncFn for connectivity checking
+  const [, checkConnectivity] = useAsyncFn(async (url: string) => {
+    if (!app) {
+      return { connected: false, error: 'Application API not available' };
     }
-  };
+
+    try {
+      return await app.checkConnectivity(url);
+    } catch (err) {
+      console.error('Failed to check connectivity:', err);
+      return { connected: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    }
+  }, [app]);
+
+  // Extract loading and error states from the loadState
+  const { loading: isLoading, error } = loadState;
 
   return {
     applications,
     isLoading,
-    error,
+    error: error?.message,
     updateApplications,
     updateConfig,
     resetToDefault,
-    openApplication
+    openApplication,
+    checkConnectivity
   };
 }

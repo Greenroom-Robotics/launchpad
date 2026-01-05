@@ -1,22 +1,19 @@
-import gamaHeroImage from '/gama-hero-box.svg'
-import lookoutHeroImage from '/lookout-hero-box.svg'
-import maropsHeroImage from '/marops-hero-box.svg'
-import missimHeroImage from '/missim-hero-box.svg'
 import { Box, Text } from 'grommet'
 import { Header } from '../components/layout/Header'
 import { ApplicationTile } from '../components/ApplicationTile'
 import { useConfig } from '../hooks/useConfig'
+import { useMemo } from 'react'
 import type { ApplicationInstance } from '../types/config'
-
-const applicationImages = {
-  gama: gamaHeroImage,
-  lookout: lookoutHeroImage,
-  marops: maropsHeroImage,
-  missim: missimHeroImage
-} as const;
+import { Link } from 'react-router'
 
 export const ApplicationsPage = () => {
-  const { applications, isLoading, error, openApplication } = useConfig();
+  const { applications, isLoading, error, openApplication, checkConnectivity } = useConfig();
+
+  // Use useMemo to optimize filtering of enabled applications
+  const enabledApplications = useMemo(
+    () => applications.filter(app => app.enabled),
+    [applications]
+  );
 
   if (isLoading) {
     return (
@@ -40,11 +37,9 @@ export const ApplicationsPage = () => {
     );
   }
 
-  const enabledApplications = applications.filter(app => app.enabled);
-
   const handleApplicationClick = async (app: ApplicationInstance) => {
     try {
-      await openApplication(app.url);
+      await openApplication(app.url, app.name);
     } catch (err) {
       console.error('Failed to open application:', err);
     }
@@ -53,15 +48,23 @@ export const ApplicationsPage = () => {
   return (
     <Box fill>
       <Header title="Launchpad" />
-      <Box direction="row" margin={{ horizontal: "medium", bottom: "medium" }} gap="medium" wrap>
-        {enabledApplications.map(app => (
-          <ApplicationTile
-            key={app.id}
-            title={app.name}
-            src={applicationImages[app.type]}
-            onClick={() => handleApplicationClick(app)}
-          />
-        ))}
+      <Box fill overflow="auto">
+        <Box direction="row" margin={{ horizontal: "medium", bottom: "medium" }} gap="medium" wrap>
+          {enabledApplications.map(app => (
+            <ApplicationTile
+              key={app.id}
+              application={app}
+              onClick={() => handleApplicationClick(app)}
+              checkConnectivity={checkConnectivity}
+            />
+          ))}
+              </Box>
+          {enabledApplications.length === 0 && (
+            <Box fill align="center" justify="center" height="medium">
+              <Text>No applications found. <Link to="/settings">Configure</Link> applications</Text>
+            </Box>
+          )  
+          }
       </Box>
     </Box>
   )

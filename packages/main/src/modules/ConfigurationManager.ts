@@ -1,8 +1,9 @@
 import Store from 'electron-store';
-import { ipcMain, shell } from 'electron';
+import { ipcMain, net } from 'electron';
 import type { ApplicationInstance, LaunchpadConfig } from '../types/config.js';
 import { defaultConfig } from '../types/config.js';
 import { AppModule } from '../AppModule.js';
+import { WindowManager } from './WindowManager.js';
 
 export class ConfigurationManager implements AppModule {
   private store: Store<LaunchpadConfig>;
@@ -56,9 +57,20 @@ export class ConfigurationManager implements AppModule {
       return this.resetToDefault();
     });
 
-    // Handle opening application URLs in external browser
-    ipcMain.handle('app:openApplication', (_, url: string) => {
-      return shell.openExternal(url);
+    // Handle opening application URLs in new Electron windows
+    ipcMain.handle('app:openApplication', async (_, { url, name }: { url: string; name: string }) => {
+      const windowManager = WindowManager.getInstance();
+      if (!windowManager) {
+        throw new Error('WindowManager not available');
+      }
+      await windowManager.createApplicationWindow(url, name);
+      // Return simple success response instead of the BrowserWindow object
+      return { success: true, url, name };
+    });
+
+    // Handle connectivity checking
+    ipcMain.handle('app:checkConnectivity', async (_, url: string) => {
+      return this.checkConnectivity(url);
     });
   }
 
@@ -83,6 +95,44 @@ export class ConfigurationManager implements AppModule {
   resetToDefault(): LaunchpadConfig {
     this.store.clear();
     return this.getConfig();
+  }
+
+  async checkConnectivity(url: string): Promise<{ connected: boolean; error?: string }> {
+    try {
+      // First check if we have basic network connectivity
+      if (!net.isOnline()) {
+        return { connected: false, error: 'No network connection' };
+      }
+
+      // Create a request to test the URL
+      const request = net.request(url);
+
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          request.abort();
+          resolve({ connected: false, error: 'Connection timeout' });
+        }, 5000); // 5 second timeout
+
+        request.on('response', () => {
+          clearTimeout(timeout);
+          // Consider any response (even 404) as connected, since the server is responding
+          resolve({ connected: true });
+        });
+
+        request.on('error', (error) => {
+          clearTimeout(timeout);
+          resolve({ connected: false, error: error.message });
+        });
+
+        // Use HEAD request to avoid downloading content
+        request.end();
+      });
+    } catch (error) {
+      return {
+        connected: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
 
 }

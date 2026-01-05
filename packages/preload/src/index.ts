@@ -17,7 +17,8 @@ const config = {
 
 // Application API
 const app = {
-  openApplication: (url: string) => ipcRenderer.invoke('app:openApplication', url),
+  openApplication: (url: string, name: string) => ipcRenderer.invoke('app:openApplication', { url, name }),
+  checkConnectivity: (url: string) => ipcRenderer.invoke('app:checkConnectivity', url),
 };
 
 export {sha256sum, versions, send, config, app};

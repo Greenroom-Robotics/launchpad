@@ -12,7 +12,7 @@ import {createConfigurationManager} from './modules/ConfigurationManager.js';
 
 export async function initApp(initConfig: AppInitConfig) {
   const moduleRunner = createModuleRunner()
-    .init(createWindowManagerModule({initConfig, openDevTools: import.meta.env.DEV}))
+    .init(createWindowManagerModule({initConfig}))
     .init(disallowMultipleAppInstance())
     .init(terminateAppOnLastWindowClose())
     .init(hardwareAccelerationMode({enable: false}))

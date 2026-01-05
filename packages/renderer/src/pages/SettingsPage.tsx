@@ -5,18 +5,17 @@ import { SchemaForm } from '@greenroom-robotics/alpha.schema-form'
 import { applicationConfigSchema } from '../types/config'
 import type { LaunchpadConfig } from '../types/config'
 import { useConfig } from '../hooks/useConfig'
+import { useAsyncFn } from 'react-use'
 
 export const SettingsPage = () => {
   const { applications, isLoading, error, updateConfig } = useConfig();
 
-  const handleSubmit = async (data: LaunchpadConfig) => {
-    try {
-      await updateConfig(data);
-      console.log("Configuration saved successfully");
-    } catch (err) {
-      console.error("Failed to save configuration:", err);
-    }
-  };
+  // Use useAsyncFn for form submission with built-in loading/error states
+  const [submitState, handleSubmit] = useAsyncFn(async (data: LaunchpadConfig) => {
+    await updateConfig(data);
+    console.log("Configuration saved successfully");
+    return data;
+  }, [updateConfig]);
 
   if (isLoading) {
     return (
@@ -41,13 +40,31 @@ export const SettingsPage = () => {
   }
 
   const currentConfig = { applications };
+  const { loading: isSaving, error: submitError, value: savedConfig } = submitState;
 
   return (
     <Box fill>
       <Header title="Settings" />
       <Box margin={{ horizontal: "medium", bottom: "medium" }} overflow="auto">
+        {/* Show save status */}
+        {isSaving && (
+          <Box pad="small" background="status-unknown" margin={{ bottom: "small" }}>
+            <Text color="white">Saving configuration...</Text>
+          </Box>
+        )}
+        {submitError && (
+          <Box pad="small" background="status-error" margin={{ bottom: "small" }}>
+            <Text color="white">Error saving: {submitError.message}</Text>
+          </Box>
+        )}
+        {savedConfig && !isSaving && !submitError && (
+          <Box pad="small" background="status-ok" margin={{ bottom: "small" }}>
+            <Text color="white">Configuration saved successfully!</Text>
+          </Box>
+        )}
+
         <SchemaForm
-          schema={applicationConfigSchema}
+          schema={applicationConfigSchema as any}
           uiSchema={{
               'applications': {
                 'ui:options': {
@@ -65,6 +82,7 @@ export const SettingsPage = () => {
           }}
           formData={currentConfig}
           onSubmit={handleSubmit}
+          disabled={isSaving}
         />
       </Box>
     </Box>
