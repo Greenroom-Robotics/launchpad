@@ -70,6 +70,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Create tag if workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag ${{ needs.validate-tag.outputs.tag }}
+          git push origin ${{ needs.validate-tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - name: Download release artifacts
         uses: actions/download-artifact@v7
         with:
