@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: '24'
           api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
-      - run: npm run typecheck --if-present
+      - run: npm run typecheck
 
   compile:
     strategy:
