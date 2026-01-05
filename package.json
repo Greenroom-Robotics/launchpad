@@ -24,7 +24,8 @@
     "typecheck": "npm run typecheck -ws --if-present",
     "create-renderer": "cd packages && node ./integrate-renderer/create-renderer.js",
     "integrate-renderer": "npm start --workspace @app/integrate-renderer",
-    "init": "npm run create-renderer && npm run integrate-renderer && npm install"
+    "init": "npm run create-renderer && npm run integrate-renderer && npm install",
+    "generate-icons": "inkscape buildResources/icon.svg --export-type=png --export-filename=buildResources/icon-1024.png --export-width=1024 --export-height=1024 --export-background-opacity=0 && npx electron-icon-builder --input=buildResources/icon-1024.png --output=buildResources --flatten && mv buildResources/icons/* buildResources/ && rmdir buildResources/icons"
   },
   "devDependencies": {
     "@npmcli/map-workspaces": "5.0.3",

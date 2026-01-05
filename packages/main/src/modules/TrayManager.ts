@@ -16,7 +16,7 @@ export class TrayManager implements AppModule {
   private setupSystemTray(): void {
     // Create tray icon path
     const currentDir = dirname(fileURLToPath(import.meta.url));
-    const trayIconPath = join(currentDir, '../../../../buildResources/tray-icon-16.png');
+    const trayIconPath = join(currentDir, '../../../buildResources/16x16.png');
 
     // Create tray icon
     const icon = nativeImage.createFromPath(trayIconPath);
@@ -30,7 +30,7 @@ export class TrayManager implements AppModule {
     // Set up context menu
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Open Launchpad',
+        label: 'Open Greenroom Launchpad',
         click: () => {
           this.showLaunchpadWindow();
         }
