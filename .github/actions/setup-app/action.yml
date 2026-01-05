@@ -3,7 +3,7 @@ inputs:
   node-version:
     description: Node.js version to use
     required: false
-    default: '23'
+    default: '24'
   api-token-github:
     description: GitHub API token for npm registry authentication
     required: true

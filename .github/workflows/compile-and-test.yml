@@ -33,7 +33,7 @@ jobs:
       - uses: ./.github/actions/setup-app
         name: Setup application
         with:
-          node-version: '23'
+          node-version: '24'
           api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
       - run: npm run lint
 
@@ -44,7 +44,7 @@ jobs:
       - uses: ./.github/actions/setup-app
         name: Setup application
         with:
-          node-version: '23'
+          node-version: '24'
           api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
       - run: npm run typecheck --if-present
 
@@ -62,7 +62,7 @@ jobs:
       - uses: ./.github/actions/setup-app
         name: Setup application
         with:
-          node-version: '23'
+          node-version: '24'
           api-token-github: ${{ secrets.API_TOKEN_GITHUB }}
 
       - name: Cache build artifacts

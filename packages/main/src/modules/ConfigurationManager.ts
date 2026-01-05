@@ -1,16 +1,15 @@
-import { singleton, inject } from 'tsyringe';
+import { singleton } from 'tsyringe';
 import Store from 'electron-store';
-import { ipcMain, net } from 'electron';
-import type { ApplicationInstance, LaunchpadConfig } from '../types/config.js';
-import { defaultConfig } from '../types/config.js';
-import { WindowManager } from './WindowManager.js';
+import { net } from 'electron';
+import type { ApplicationInstance, LaunchpadConfig } from '@app/shared';
+import { defaultConfig } from '@app/shared';
 import type { IInitializable } from '../interfaces.js';
 
 @singleton()
 export class ConfigurationManager implements IInitializable {
   private store: Store<LaunchpadConfig>;
 
-  constructor(@inject(WindowManager) private windowManager: WindowManager) {
+  constructor() {
     this.store = new Store<LaunchpadConfig>({
       name: 'launchpad-config',
       defaults: defaultConfig,
@@ -38,41 +37,7 @@ export class ConfigurationManager implements IInitializable {
   }
 
   async initialize(): Promise<void> {
-    // Set up IPC handlers for configuration management
-    ipcMain.handle('config:getApplications', () => {
-      return this.getApplications();
-    });
-
-    ipcMain.handle('config:setApplications', (_, applications: ApplicationInstance[]) => {
-      return this.setApplications(applications);
-    });
-
-    ipcMain.handle('config:getConfig', () => {
-      return this.getConfig();
-    });
-
-    ipcMain.handle('config:setConfig', (_, config: LaunchpadConfig) => {
-      return this.setConfig(config);
-    });
-
-    ipcMain.handle('config:resetToDefault', () => {
-      return this.resetToDefault();
-    });
-
-    // Handle opening application URLs in new Electron windows
-    ipcMain.handle(
-      'app:openApplication',
-      async (_, { url, name }: { url: string; name: string }) => {
-        await this.windowManager.createApplicationWindow(url, name);
-        // Return simple success response instead of the BrowserWindow object
-        return { success: true, url, name };
-      }
-    );
-
-    // Handle connectivity checking
-    ipcMain.handle('app:checkConnectivity', async (_, url: string) => {
-      return this.checkConnectivity(url);
-    });
+    // IPC handlers have been migrated to tRPC
   }
 
   getApplications(): ApplicationInstance[] {

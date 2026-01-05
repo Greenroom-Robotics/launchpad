@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "erasableSyntaxOnly": false,
     "types": ["node"],
     "baseUrl": ".",
     "paths": {

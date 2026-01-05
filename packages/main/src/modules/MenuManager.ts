@@ -1,5 +1,6 @@
 import { singleton, inject } from 'tsyringe';
-import { Menu, BrowserWindow, MenuItemConstructorOptions } from 'electron';
+import { Menu, BrowserWindow } from 'electron';
+import type { MenuItemConstructorOptions } from 'electron';
 import { WindowManager, WINDOW_TYPES } from './WindowManager.js';
 import type { IInitializable } from '../interfaces.js';
 import { TYPES } from '../types.js';

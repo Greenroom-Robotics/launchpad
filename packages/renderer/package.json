@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@app/shared": "*",
     "@greenroom-robotics/alpha.schema-form": "^11.1.0",
     "@greenroom-robotics/alpha.ui": "^1.20.0",
+    "@tanstack/react-query": "^5.80.6",
+    "@trpc/client": "11.3.1",
+    "@trpc/react-query": "11.3.1",
+    "electron-trpc-experimental": "1.0.0-alpha.1",
     "grommet": "^2.52.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

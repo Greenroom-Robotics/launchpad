@@ -7,19 +7,19 @@ import { useConfig } from '../hooks/useConfig';
 import { useAsyncFn } from 'react-use';
 
 export const SettingsPage = () => {
-  const { applications, isLoading, error, updateConfig } = useConfig();
+  const { applications, updateConfig } = useConfig();
 
   // Use useAsyncFn for form submission with built-in loading/error states
   const [submitState, handleSubmit] = useAsyncFn(
     async (data: LaunchpadConfig) => {
-      await updateConfig(data);
+      await updateConfig.mutateAsync(data);
       console.log('Configuration saved successfully');
       return data;
     },
     [updateConfig]
   );
 
-  if (isLoading) {
+  if (applications.isLoading) {
     return (
       <Box fill>
         <Header title="Launchpad - Settings" />
@@ -30,18 +30,18 @@ export const SettingsPage = () => {
     );
   }
 
-  if (error) {
+  if (applications.error) {
     return (
       <Box fill>
         <Header title="Launchpad - Settings" />
         <Box align="center" justify="center" fill>
-          <Text color="status-error">Error: {error}</Text>
+          <Text color="status-error">Error: {applications.error.message}</Text>
         </Box>
       </Box>
     );
   }
 
-  const currentConfig = { applications };
+  const currentConfig = { applications: applications.data || [] };
   const { loading: isSaving, error: submitError, value: savedConfig } = submitState;
 
   return (

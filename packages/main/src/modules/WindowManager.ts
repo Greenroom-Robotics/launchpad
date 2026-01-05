@@ -148,7 +148,7 @@ export class WindowManager implements IInitializable {
     // Handle load errors
     browserWindow.webContents.on(
       'did-fail-load',
-      (event, errorCode, errorDescription, validatedURL) => {
+      (_event, errorCode, errorDescription, validatedURL) => {
         console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
         // Show the window even on load failure so user can see the error
         if (!browserWindow.isDestroyed()) {

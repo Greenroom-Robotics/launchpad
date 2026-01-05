@@ -13,10 +13,17 @@ import { HardwareAccelerationModule } from './modules/HardwareAccelerationModule
 import { SingleInstanceApp } from './modules/SingleInstanceApp.js';
 import { BlockNotAllowedOrigins } from './modules/BlockNotAllowdOrigins.js';
 import { ExternalUrls } from './modules/ExternalUrls.js';
+import { appRouter } from './trpc/router.js';
+
+export type { AppRouter } from './trpc/router.js';
 
 export async function initApp(initConfig: AppInitConfig) {
-  // Setup DI container with values
+  // Setup dependency injection
   setupDI(initConfig);
+
+  // Initialize tRPC - use experimental electron-trpc
+  const { createIPCHandler } = await import('electron-trpc-experimental/main');
+  createIPCHandler({ router: appRouter });
 
   // Create security services with runtime configuration
   const allowedOrigins = new Set(

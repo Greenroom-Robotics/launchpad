@@ -1,4 +1,6 @@
 import type { RJSFSchema } from '@greenroom-robotics/alpha.schema-form';
+import type { ApplicationInstance, LaunchpadConfig } from '@app/shared';
+import { defaultConfig } from '@app/shared';
 
 // Extended schema type that supports enumNames
 interface ExtendedRJSFSchema extends RJSFSchema {
@@ -7,18 +9,7 @@ interface ExtendedRJSFSchema extends RJSFSchema {
   items?: ExtendedRJSFSchema;
 }
 
-export interface ApplicationInstance {
-  id: string;
-  name: string;
-  type: 'gama' | 'lookout' | 'marops' | 'missim';
-  url: string;
-  description?: string;
-  enabled: boolean;
-}
-
-export interface LaunchpadConfig {
-  applications: ApplicationInstance[];
-}
+export type { ApplicationInstance, LaunchpadConfig };
 
 export const applicationConfigSchema: ExtendedRJSFSchema = {
   type: 'object',
@@ -70,35 +61,4 @@ export const applicationConfigSchema: ExtendedRJSFSchema = {
   required: ['applications'],
 };
 
-export const defaultConfig: LaunchpadConfig = {
-  applications: [
-    {
-      id: 'local-gama',
-      name: 'Local - GAMA',
-      type: 'gama',
-      url: 'http://localhost:3000',
-      enabled: true,
-    },
-    {
-      id: 'local-lookout',
-      name: 'Local - Lookout+',
-      type: 'lookout',
-      url: 'http://localhost:4000',
-      enabled: true,
-    },
-    {
-      id: 'local-marops',
-      name: 'Local - MarOps',
-      type: 'marops',
-      url: 'http://localhost:7000',
-      enabled: true,
-    },
-    {
-      id: 'local-missim',
-      name: 'Local - MIS-SIM',
-      type: 'missim',
-      url: 'http://localhost:5000',
-      enabled: true,
-    },
-  ],
-};
+export { defaultConfig };

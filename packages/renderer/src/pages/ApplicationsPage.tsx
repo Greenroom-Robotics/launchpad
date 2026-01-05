@@ -2,20 +2,22 @@ import { Box, Grid, Text } from 'grommet';
 import { Header } from '../components/layout/Header';
 import { ApplicationTile } from '../components/ApplicationTile';
 import { useConfig } from '../hooks/useConfig';
+import { trpc } from '../trpc-react';
 import { useMemo } from 'react';
 import type { ApplicationInstance } from '../types/config';
 import { Link } from 'react-router';
 
 export const ApplicationsPage = () => {
-  const { applications, isLoading, error, openApplication, checkConnectivity } = useConfig();
+  const { applications, openApplication } = useConfig();
+  const utils = trpc.useUtils();
 
   // Use useMemo to optimize filtering of enabled applications
   const enabledApplications = useMemo(
-    () => applications.filter((app) => app.enabled),
-    [applications]
+    () => (applications.data || []).filter((app) => app.enabled),
+    [applications.data]
   );
 
-  if (isLoading) {
+  if (applications.isLoading) {
     return (
       <Box fill>
         <Header title="Launchpad - Apps" />
@@ -26,12 +28,12 @@ export const ApplicationsPage = () => {
     );
   }
 
-  if (error) {
+  if (applications.error) {
     return (
       <Box fill>
         <Header title="Launchpad - Apps" />
         <Box align="center" justify="center" fill>
-          <Text color="status-error">Error: {error}</Text>
+          <Text color="status-error">Error: {applications.error.message}</Text>
         </Box>
       </Box>
     );
@@ -39,7 +41,7 @@ export const ApplicationsPage = () => {
 
   const handleApplicationClick = async (app: ApplicationInstance) => {
     try {
-      await openApplication(app.url, app.name);
+      await openApplication.mutateAsync({ url: app.url, name: app.name });
     } catch (err) {
       console.error('Failed to open application:', err);
     }
@@ -55,7 +57,7 @@ export const ApplicationsPage = () => {
               key={app.id}
               application={app}
               onClick={() => handleApplicationClick(app)}
-              checkConnectivity={checkConnectivity}
+              checkConnectivity={(url) => utils.client.app.checkConnectivity.query(url)}
             />
           ))}
         </Grid>
