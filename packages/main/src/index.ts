@@ -2,24 +2,28 @@ import type {AppInitConfig} from './AppInitConfig.js';
 import {createModuleRunner} from './ModuleRunner.js';
 import {disallowMultipleAppInstance} from './modules/SingleInstanceApp.js';
 import {createWindowManagerModule} from './modules/WindowManager.js';
-import {terminateAppOnLastWindowClose} from './modules/ApplicationTerminatorOnLastWindowClose.js';
+import {createBackgroundOperationManager} from './modules/BackgroundOperationManager.js';
 import {hardwareAccelerationMode} from './modules/HardwareAccelerationModule.js';
 import {autoUpdater} from './modules/AutoUpdater.js';
 import {allowInternalOrigins} from './modules/BlockNotAllowdOrigins.js';
 import {allowExternalUrls} from './modules/ExternalUrls.js';
 import {createConfigurationManager} from './modules/ConfigurationManager.js';
 import {createMenuManager} from './modules/MenuManager.js';
+import {createTrayManager} from './modules/TrayManager.js';
+import {createAutoStartManager} from './modules/AutoStartManager.js';
 
 
 export async function initApp(initConfig: AppInitConfig) {
   const moduleRunner = createModuleRunner()
     .init(createWindowManagerModule({initConfig}))
     .init(disallowMultipleAppInstance())
-    .init(terminateAppOnLastWindowClose())
+    .init(createBackgroundOperationManager())
     .init(hardwareAccelerationMode({enable: false}))
     .init(autoUpdater())
     .init(createConfigurationManager())
     .init(createMenuManager())
+    .init(createTrayManager())
+    .init(createAutoStartManager())
 
     // Install DevTools extension if needed
     // .init(chromeDevToolsExtension({extension: 'VUEJS3_DEVTOOLS'}))

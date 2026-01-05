@@ -199,6 +199,26 @@ export class WindowManager implements AppModule {
     return this.#windowMetadata.get(window);
   }
 
+  showLaunchpadWindow(): void {
+    // Find existing Launchpad window
+    const launchpadWindow = BrowserWindow.getAllWindows().find(window => {
+      const metadata = this.#windowMetadata.get(window);
+      return metadata && metadata.type === WINDOW_TYPES.LAUNCHPAD && !window.isDestroyed();
+    });
+
+    if (launchpadWindow) {
+      // Show and focus existing window
+      if (launchpadWindow.isMinimized()) {
+        launchpadWindow.restore();
+      }
+      launchpadWindow.show();
+      launchpadWindow.focus();
+    } else {
+      // Create and show new Launchpad window
+      this.createNewWindow();
+    }
+  }
+
   async createNewApplicationWindow(url: string, applicationName: string): Promise<BrowserWindow> {
     // Always create a new window, don't check for existing ones
     const browserWindow = new BrowserWindow({

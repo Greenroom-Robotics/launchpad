@@ -99,34 +99,24 @@ export class MenuManager implements AppModule {
   private createNewWindow(): void {
     const windowManager = WindowManager.getInstance();
     if (!windowManager) {
-      console.error('Menu: WindowManager not available');
       return;
     }
 
     const focusedWindow = BrowserWindow.getFocusedWindow();
     if (!focusedWindow) {
-      console.log('Menu: No focused window, creating new Launchpad window');
       windowManager.createNewWindow();
       return;
     }
 
     // Get window metadata to determine window type
     const metadata = windowManager.getWindowMetadata(focusedWindow);
-    console.log('Menu: Window metadata:', metadata);
-    console.log('Menu: Window title:', focusedWindow.getTitle());
 
     if (!metadata || metadata.type === WINDOW_TYPES.LAUNCHPAD) {
-      console.log('Menu: Creating new Launchpad window');
       windowManager.createNewWindow();
     } else if (metadata.type === WINDOW_TYPES.APPLICATION) {
-      console.log('Menu: Creating new application window:', metadata);
       // Create a new application window with the same URL and name
       if (metadata.applicationUrl && metadata.applicationName) {
-        windowManager.createNewApplicationWindow(metadata.applicationUrl, metadata.applicationName)
-          .then(() => console.log('Menu: Application window created successfully'))
-          .catch(err => console.error('Menu: Error creating application window:', err));
-      } else {
-        console.error('Menu: Missing application URL or name in metadata');
+        windowManager.createNewApplicationWindow(metadata.applicationUrl, metadata.applicationName);
       }
     }
   }
