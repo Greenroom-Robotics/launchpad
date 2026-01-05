@@ -125,7 +125,7 @@ jobs:
       - name: Create GitHub Release
         run: |
           gh release create ${{ needs.validate-tag.outputs.tag }} \
-            dist/root* dist/latest*.yml \
+            dist/*.exe dist/*.dmg dist/*.deb dist/latest*.yml \
             --repo ${{ github.repository }} \
             --title "Release ${{ needs.validate-tag.outputs.tag }}" \
             --notes-file release-notes.md \
