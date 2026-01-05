@@ -1,4 +1,4 @@
-import { Box, Text } from 'grommet'
+import { Box, Grid, Text } from 'grommet'
 import { Header } from '../components/layout/Header'
 import { ApplicationTile } from '../components/ApplicationTile'
 import { useConfig } from '../hooks/useConfig'
@@ -18,7 +18,7 @@ export const ApplicationsPage = () => {
   if (isLoading) {
     return (
       <Box fill>
-        <Header title="Launchpad" />
+        <Header title="Launchpad - Apps" />
         <Box align="center" justify="center" fill>
           <Text>Loading applications...</Text>
         </Box>
@@ -29,7 +29,7 @@ export const ApplicationsPage = () => {
   if (error) {
     return (
       <Box fill>
-        <Header title="Launchpad" />
+        <Header title="Launchpad - Apps" />
         <Box align="center" justify="center" fill>
           <Text color="status-error">Error: {error}</Text>
         </Box>
@@ -48,8 +48,11 @@ export const ApplicationsPage = () => {
   return (
     <Box fill>
       <Header title="Launchpad - Apps" />
-      <Box fill overflow="auto">
-        <Box direction="row" margin={{ horizontal: "medium", bottom: "medium" }} gap="medium" wrap>
+      <Box fill overflow="auto" pad="medium">
+        <Grid
+          columns={{ count: 'fill', size: 'medium' }}
+          gap="small"
+        >
           {enabledApplications.map(app => (
             <ApplicationTile
               key={app.id}
@@ -58,7 +61,7 @@ export const ApplicationsPage = () => {
               checkConnectivity={checkConnectivity}
             />
           ))}
-              </Box>
+        </Grid>
           {enabledApplications.length === 0 && (
             <Box fill align="center" justify="center" height="medium">
               <Text>No applications found. <Link to="/settings">Configure</Link> applications</Text>

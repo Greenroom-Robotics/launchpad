@@ -18,11 +18,11 @@ const test = base.extend<TestFixtures>({
   electronApp: [async ({}, use) => {
 
     /**
-     * Executable path depends on root package name!
+     * Executable path depends on package name!
      */
-    let executablePattern = 'dist/*/root{,.*}';
+    let executablePattern = 'dist/*/@greenroom-roboticslaunchpad{,.*}';
     if (platform === 'darwin') {
-      executablePattern += '/Contents/*/root';
+      executablePattern += '/Contents/*/@greenroom-roboticslaunchpad';
     }
 
     const [executablePath] = globSync(executablePattern);
@@ -99,24 +99,11 @@ test('Main window state', async ({electronApp, page}) => {
 
 test.describe('Main window web content', async () => {
 
-  test('The main window has an interactive button', async ({page}) => {
-    const element = page.getByRole('button');
+  test('The main window shows Launchpad - Apps', async ({page}) => {
+    const element = page.getByText('Launchpad - Apps');
     await expect(element).toBeVisible();
-    await expect(element).toHaveText('count is 0');
-    await element.click();
-    await expect(element).toHaveText('count is 1');
   });
 
-  test('The main window has a vite logo', async ({page}) => {
-    const element = page.getByAltText('Vite logo');
-    await expect(element).toBeVisible();
-    await expect(element).toHaveRole('img');
-    const imgState = await element.evaluate((img: HTMLImageElement) => img.complete);
-    const imgNaturalWidth = await element.evaluate((img: HTMLImageElement) => img.naturalWidth);
-
-    expect(imgState).toEqual(true);
-    expect(imgNaturalWidth).toBeGreaterThan(0);
-  });
 });
 
 test.describe('Preload context should be exposed', async () => {
@@ -154,7 +141,7 @@ test.describe('Preload context should be exposed', async () => {
 
     test('with same behavior', async ({page, electronApp}) => {
       await electronApp.evaluate(async ({ipcMain}) => {
-        ipcMain.handle('test', (event, message) => btoa(message));
+        ipcMain.handle('test', (_, message) => btoa(message));
       });
 
       const testString = btoa(`${Date.now() * Math.random()}`);

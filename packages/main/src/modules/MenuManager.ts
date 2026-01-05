@@ -1,6 +1,6 @@
 import type {AppModule} from '../AppModule.js';
 import {ModuleContext} from '../ModuleContext.js';
-import {Menu, BrowserWindow} from 'electron';
+import {Menu, BrowserWindow, MenuItemConstructorOptions} from 'electron';
 import {WindowManager, WINDOW_TYPES} from './WindowManager.js';
 
 export class MenuManager implements AppModule {
@@ -11,7 +11,7 @@ export class MenuManager implements AppModule {
   }
 
   private setupApplicationMenu(): void {
-    const template = [
+    const template: MenuItemConstructorOptions[] = [
       {
         label: 'File',
         submenu: [
@@ -39,7 +39,7 @@ export class MenuManager implements AppModule {
           { role: 'cut' },
           { role: 'copy' },
           { role: 'paste' },
-          { role: 'selectall' }
+          { role: 'selectAll' }
         ]
       },
       {
@@ -83,7 +83,7 @@ export class MenuManager implements AppModule {
       });
 
       // macOS Window menu adjustments
-      (template[4] as any).submenu = [
+      template[4].submenu = [
         { role: 'close' },
         { role: 'minimize' },
         { role: 'zoom' },
@@ -92,7 +92,7 @@ export class MenuManager implements AppModule {
       ];
     }
 
-    const menu = Menu.buildFromTemplate(template as any);
+    const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
   }
 

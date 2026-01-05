@@ -20,7 +20,7 @@ export const SettingsPage = () => {
   if (isLoading) {
     return (
       <Box fill>
-        <Header title="Settings" />
+        <Header title="Launchpad - Settings" />
         <Box align="center" justify="center" fill>
           <Text>Loading configuration...</Text>
         </Box>
@@ -31,7 +31,7 @@ export const SettingsPage = () => {
   if (error) {
     return (
       <Box fill>
-        <Header title="Settings" />
+        <Header title="Launchpad - Settings" />
         <Box align="center" justify="center" fill>
           <Text color="status-error">Error: {error}</Text>
         </Box>
@@ -44,7 +44,7 @@ export const SettingsPage = () => {
 
   return (
     <Box fill>
-      <Header title="Lauchpad - Settings" />
+      <Header title="Launchpad - Settings" />
       <Box margin={{ horizontal: "medium", bottom: "medium" }} overflow="auto">
         {/* Show save status */}
         {isSaving && (

@@ -1,3 +1,5 @@
+import type { RJSFSchema } from "@greenroom-robotics/alpha.schema-form";
+
 export interface ApplicationInstance {
   id: string;
   name: string;
@@ -11,7 +13,7 @@ export interface LaunchpadConfig {
   applications: ApplicationInstance[];
 }
 
-export const applicationConfigSchema = {
+export const applicationConfigSchema: RJSFSchema = {
   "type": "object",
   "properties": {
     "applications": {
@@ -34,7 +36,7 @@ export const applicationConfigSchema = {
             "type": "string",
             "title": "Application Type",
             "enum": ["gama", "lookout", "marops", "missim"],
-            "enumNames": ["GAMA", "Lookout+", "MarOps", "MIS-SIM"]
+            "enumNames": ["GAMA", "Lookout+", "MarOps", "MIS-SIM"] as any
           },
           "url": {
             "type": "string",

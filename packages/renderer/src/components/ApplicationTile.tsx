@@ -80,7 +80,6 @@ export const ApplicationTile = ({ application, onClick, checkConnectivity }: IAp
 
   return (
     <Box
-      width="medium"
       onClick={isClickable ? handleClick : undefined}
       style={{
         cursor: isClickable && !isClickLoading ? 'pointer' : 'default',
