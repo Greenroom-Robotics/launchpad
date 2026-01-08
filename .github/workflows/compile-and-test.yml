@@ -65,16 +65,16 @@ jobs:
           node-version: '24'
           api-token-github: ${{ secrets.SOFTWARE_TEAM_READ_PACKAGES_API_TOKEN_GITHUB }}
 
-      - name: Cache build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            packages/*/dist
-            dist
-          key: build-${{ runner.os }}-${{ hashFiles('packages/*/src/**', 'packages/*/package.json') }}-${{ inputs.app-version }}
-          restore-keys: |
-            build-${{ runner.os }}-${{ hashFiles('packages/*/src/**', 'packages/*/package.json') }}-
-            build-${{ runner.os }}-
+      # - name: Cache build artifacts
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       packages/*/dist
+      #       dist
+      #     key: build-${{ runner.os }}-${{ hashFiles('packages/*/src/**', 'packages/*/package.json') }}-${{ inputs.app-version }}
+      #     restore-keys: |
+      #       build-${{ runner.os }}-${{ hashFiles('packages/*/src/**', 'packages/*/package.json') }}-
+      #       build-${{ runner.os }}-
 
       - run: npm version "${{inputs.app-version}}" --no-git-tag-version
       - run: npm run compile -- -p never
@@ -96,3 +96,4 @@ jobs:
         with:
           name: ${{ matrix.os }}-${{inputs.distribution-channel}}
           path: dist
+          retention-days: 1
