@@ -4,7 +4,10 @@ import { pathToFileURL } from 'url';
  * Normalizes a path or URL and appends query parameters.
  * Works for both dev (http) and prod (file) environments.
  */
-export const formatAppUrl = (base: { path: string } | URL, params: Record<string, string>): string => {
+export const formatAppUrl = (
+  base: { path: string } | URL,
+  params: Record<string, string>
+): string => {
   let urlObj: URL;
 
   if (base instanceof URL) {
@@ -22,4 +25,4 @@ export const formatAppUrl = (base: { path: string } | URL, params: Record<string
   });
 
   return urlObj.href;
-}
+};

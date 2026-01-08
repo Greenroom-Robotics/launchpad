@@ -188,12 +188,12 @@ export class AuthService {
       loginWindow.once('ready-to-show', () => {
         loginWindow.show();
       });
-      
+
       const loginUrl = formatAppUrl(this.#renderer, {
-        login: "true",
+        login: 'true',
         url,
-        realm: realm || "",
-      })
+        realm: realm || '',
+      });
 
       console.log(`[AuthService] Stored resolver for ${url}`);
 
