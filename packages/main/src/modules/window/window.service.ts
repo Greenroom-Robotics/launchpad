@@ -4,6 +4,7 @@ import { BrowserWindow } from 'electron';
 import type { AppInitConfig } from '../../AppInitConfig.js';
 import { AuthService, UserCancelledAuthError } from '../auth/auth.service.js';
 import type { WindowMetadata } from '@app/shared';
+import { formatAppUrl } from '../..//utils.js';
 
 const WINDOW_TYPES = {
   LAUNCHPAD: 'launchpad',
@@ -58,11 +59,7 @@ export class WindowService {
       type: WINDOW_TYPES.LAUNCHPAD,
     });
 
-    if (this.#renderer instanceof URL) {
-      await browserWindow.loadURL(this.#renderer.href);
-    } else {
-      await browserWindow.loadFile(this.#renderer.path);
-    }
+    await browserWindow.loadURL(formatAppUrl(this.#renderer, {}));
 
     return browserWindow;
   }

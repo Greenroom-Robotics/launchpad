@@ -5,6 +5,7 @@ import type { AuthCredentials, AuthValidationResult } from '@app/shared';
 import type { AppInitConfig } from '../../AppInitConfig.js';
 import { TYPES } from '../../types.js';
 import { BrowserWindow } from 'electron';
+import { formatAppUrl } from '../../utils.js';
 
 /**
  * Error thrown when user explicitly cancels authentication
@@ -187,26 +188,12 @@ export class AuthService {
       loginWindow.once('ready-to-show', () => {
         loginWindow.show();
       });
-
-      // Create login URL with URL and realm as query parameters (no challengeId needed!)
-      let loginUrl: string;
-      if (this.#renderer instanceof URL) {
-        const loginUrlObj = new URL(this.#renderer.href);
-        loginUrlObj.searchParams.set('login', 'true');
-        loginUrlObj.searchParams.set('url', url);
-        if (realm) {
-          loginUrlObj.searchParams.set('realm', realm);
-        }
-        loginUrl = loginUrlObj.href;
-      } else {
-        // For file-based renderer
-        const params = new URLSearchParams({
-          login: 'true',
-          url,
-          ...(realm && { realm }),
-        });
-        loginUrl = `${this.#renderer.path}?${params.toString()}`;
-      }
+      
+      const loginUrl = formatAppUrl(this.#renderer, {
+        login: "true",
+        url,
+        realm: realm || "",
+      })
 
       console.log(`[AuthService] Stored resolver for ${url}`);
 
