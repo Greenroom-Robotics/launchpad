@@ -1,7 +1,7 @@
 import { Box, Text, Button, Heading } from 'grommet';
 import { SchemaForm } from '@greenroom-robotics/alpha.schema-form';
 import type { RJSFSchema } from '@greenroom-robotics/alpha.schema-form';
-import chartImage from '../../public/chart.jpg';
+import chartImage from '../assets/chart.jpg';
 import { useState } from 'react';
 import { trpc } from '../trpc-react';
 import { TexturedPanel } from '../components/TexturedPanel';

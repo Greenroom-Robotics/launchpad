@@ -42,7 +42,7 @@ export const App = () => {
           <Routes>
             <Route path="/" element={<ApplicationsPage />} />
             <Route path="/installer" element={<InstallerPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/*" element={<SettingsPage />} />
           </Routes>
         </TexturedPanel>
       </QueryClientProvider>

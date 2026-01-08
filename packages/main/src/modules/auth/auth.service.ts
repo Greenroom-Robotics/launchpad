@@ -226,7 +226,11 @@ export class AuthService {
    * @param credentials The credentials to resolve with, or null for cancellation
    * @param validationPassed If true, credentials have been validated and window should close
    */
-  async resolveLogin(url: string, credentials: AuthCredentials | null, validationPassed: boolean = false): Promise<boolean> {
+  async resolveLogin(
+    url: string,
+    credentials: AuthCredentials | null,
+    validationPassed: boolean = false
+  ): Promise<boolean> {
     console.log(`[AuthService] Attempting to resolve login for ${url}`);
     console.log(`[AuthService] Active login URLs:`, Array.from(this.activeLoginResolvers.keys()));
 
@@ -246,13 +250,17 @@ export class AuthService {
         for (const window of allWindows) {
           const windowUrl = window.webContents.getURL();
           if (windowUrl.includes(`url=${encodeURIComponent(url)}`)) {
-            console.log(`[AuthService] Closing login window for resolved URL ${url} (validation passed)`);
+            console.log(
+              `[AuthService] Closing login window for resolved URL ${url} (validation passed)`
+            );
             window.close();
             break;
           }
         }
       } else {
-        console.log(`[AuthService] Keeping login window open for ${url} (validation not confirmed)`);
+        console.log(
+          `[AuthService] Keeping login window open for ${url} (validation not confirmed)`
+        );
       }
     } else {
       // User cancelled
