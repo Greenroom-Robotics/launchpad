@@ -8,7 +8,7 @@ import { Link } from 'react-router';
 import type { ApplicationInstance } from '@app/shared';
 
 export const ApplicationsPage = () => {
-  const { applications, openApplication } = useConfig();
+  const { applications, launchApp } = useConfig();
   const utils = trpc.useUtils();
 
   // Use useMemo to optimize filtering of enabled applications
@@ -41,9 +41,12 @@ export const ApplicationsPage = () => {
 
   const handleApplicationClick = async (app: ApplicationInstance) => {
     try {
-      await openApplication.mutateAsync({ url: app.url, name: app.name });
+      const result = await launchApp.mutateAsync({ appId: app.id });
+      if (!result.success) {
+        console.error('Failed to launch application:', result.message);
+      }
     } catch (err) {
-      console.error('Failed to open application:', err);
+      console.error('Failed to launch application:', err);
     }
   };
 
@@ -51,13 +54,13 @@ export const ApplicationsPage = () => {
     <Box fill>
       <Header title="Launchpad - Apps" />
       <Box fill overflow="auto" pad="medium">
-        <Grid columns={{ count: 'fill', size: 'medium' }} gap="small">
+        <Grid columns={{ count: 'fill', size: '300px' }} gap="small">
           {enabledApplications.map((app) => (
             <ApplicationTile
               key={app.id}
               application={app}
               onClick={() => handleApplicationClick(app)}
-              checkConnectivity={(url) => utils.client.app.checkConnectivity.query(url)}
+              checkConnectivity={() => utils.client.apps.checkAppConnectivity.query(app.id)}
             />
           ))}
         </Grid>

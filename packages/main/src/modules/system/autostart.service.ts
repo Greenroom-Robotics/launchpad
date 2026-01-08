@@ -1,7 +1,6 @@
 import { singleton, inject } from 'tsyringe';
 import { app } from 'electron';
-import type { IInitializable } from '../interfaces.js';
-import { TYPES } from '../types.js';
+import { TYPES } from '../../types.js';
 
 interface AutoStartOptions {
   enabled?: boolean;
@@ -10,7 +9,7 @@ interface AutoStartOptions {
 }
 
 @singleton()
-export class AutoStartManager implements IInitializable {
+export class AutoStartService {
   readonly #options: AutoStartOptions;
 
   constructor(@inject(TYPES.ElectronApp) private app: Electron.App) {
@@ -19,13 +18,16 @@ export class AutoStartManager implements IInitializable {
       openAtLogin: true,
       openAsHidden: true,
     };
+
+    // Initialize auto-start setup
+    if (this.#options.enabled) {
+      this.initializeAsync();
+    }
   }
 
-  async initialize(): Promise<void> {
-    if (this.#options.enabled) {
-      await this.app.whenReady();
-      this.setupAutoStart();
-    }
+  private async initializeAsync(): Promise<void> {
+    await this.app.whenReady();
+    this.setupAutoStart();
   }
 
   private setupAutoStart(): void {
@@ -41,7 +43,7 @@ export class AutoStartManager implements IInitializable {
       path: process.execPath,
     });
 
-    console.log('AutoStartManager: Configured app to start at login');
+    console.log('AutoStartService: Configured app to start at login');
   }
 
   // Method to disable auto-start (can be called from settings)
@@ -49,7 +51,7 @@ export class AutoStartManager implements IInitializable {
     app.setLoginItemSettings({
       openAtLogin: false,
     });
-    console.log('AutoStartManager: Disabled auto-start');
+    console.log('AutoStartService: Disabled auto-start');
   }
 
   // Method to enable auto-start (can be called from settings)
@@ -60,7 +62,7 @@ export class AutoStartManager implements IInitializable {
       name: 'Greenroom Launchpad',
       path: process.execPath,
     });
-    console.log('AutoStartManager: Enabled auto-start');
+    console.log('AutoStartService: Enabled auto-start');
   }
 
   // Check current auto-start status

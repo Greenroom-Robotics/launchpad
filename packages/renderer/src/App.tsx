@@ -21,13 +21,14 @@ export const App = () => {
   // Check if this is a login window (based on URL parameters)
   const urlParams = new URLSearchParams(window.location.search);
   const isLoginWindow = urlParams.has('login');
-  const challengeId = urlParams.get('challengeId');
+  const url = urlParams.get('url');
+  const realm = urlParams.get('realm');
 
-  if (isLoginWindow) {
+  if (isLoginWindow && url) {
     return (
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <LoginPage challengeId={challengeId!} />
+          <LoginPage url={url} realm={realm || undefined} />
         </QueryClientProvider>
       </trpc.Provider>
     );

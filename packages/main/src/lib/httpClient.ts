@@ -1,5 +1,16 @@
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type { AxiosInstance } from 'axios';
 import https from 'https';
+
+interface AxiosError {
+  response?: {
+    status: number;
+  };
+}
+
+function isAxiosError(error: unknown): error is AxiosError {
+  return (error && typeof error === 'object' && 'response' in error) as boolean;
+}
 
 export class SecureHttpClient {
   private instance: AxiosInstance;
@@ -41,12 +52,13 @@ export class SecureHttpClient {
         success: response.status >= 200 && response.status < 400,
         status: response.status,
       };
-    } catch (error: any) {
-      console.error(`[SecureHttpClient] Auth test failed for ${url}:`, error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[SecureHttpClient] Auth test failed for ${url}:`, errorMessage);
       // If request fails completely, return error status
       return {
         success: false,
-        status: error.response?.status || 0,
+        status: isAxiosError(error) ? error.response?.status || 0 : 0,
       };
     }
   }
@@ -66,10 +78,10 @@ export class SecureHttpClient {
         connected: true,
         status: response.status,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         connected: false,
-        error: error.message || 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

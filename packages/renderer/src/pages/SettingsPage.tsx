@@ -67,10 +67,10 @@ export const SettingsPage = () => {
   const { applications, updateConfig } = useConfig();
 
   // Get stored authentication hosts
-  const { data: storedHosts, refetch: refetchHosts } = trpc.app.getStoredAuthHosts.useQuery();
+  const { data: storedHosts, refetch: refetchHosts } = trpc.auth.getStoredAuthHosts.useQuery();
 
   // Clear stored credentials mutation
-  const clearCredentials = trpc.app.clearStoredCredentials.useMutation({
+  const clearCredentials = trpc.auth.clearStoredCredentials.useMutation({
     onSuccess: () => {
       refetchHosts();
     },
@@ -185,9 +185,9 @@ export const SettingsPage = () => {
                 label="Clear All Stored Credentials"
                 color="status-critical"
                 onClick={handleClearAllCredentials}
-                disabled={clearCredentials.isLoading || !storedHosts?.hosts?.length}
+                disabled={clearCredentials.isPending || !storedHosts?.hosts?.length}
               />
-              {clearCredentials.isLoading && <Text size="small">Clearing credentials...</Text>}
+              {clearCredentials.isPending && <Text size="small">Clearing credentials...</Text>}
               {clearCredentials.isSuccess && (
                 <Text size="small" color="status-ok">
                   Credentials cleared successfully

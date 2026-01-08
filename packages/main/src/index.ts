@@ -2,16 +2,13 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import type { AppInitConfig } from './AppInitConfig.js';
 import { setupDI } from './di.js';
-import { WindowManager } from './modules/WindowManager.js';
-import { ConfigurationManager } from './modules/ConfigurationManager.js';
-import { TrayManager } from './modules/TrayManager.js';
-import { MenuManager } from './modules/MenuManager.js';
-import { AutoStartManager } from './modules/AutoStartManager.js';
-import { AutoUpdater } from './modules/AutoUpdater.js';
-import { BackgroundOperationManager } from './modules/BackgroundOperationManager.js';
-import { HardwareAccelerationModule } from './modules/HardwareAccelerationModule.js';
-import { SingleInstanceApp } from './modules/SingleInstanceApp.js';
-import { BasicAuthManager } from './modules/BasicAuthManager.js';
+import { AuthModule } from './modules/auth/index.js';
+import { ConfigModule } from './modules/config/index.js';
+import { WindowModule } from './modules/window/index.js';
+import { SystemModule } from './modules/system/index.js';
+import { UpdateModule } from './modules/update/index.js';
+import { CoreModule } from './modules/core/index.js';
+import { AppsModule } from './modules/apps/index.js';
 import { appRouter } from './trpc/router.js';
 
 export type { AppRouter } from './trpc/router.js';
@@ -20,7 +17,16 @@ export async function initApp(initConfig: AppInitConfig) {
   // Setup dependency injection
   setupDI(initConfig);
 
-  // Initialize tRPC - use experimental electron-trpc
+  // Register all domain modules
+  AuthModule.register();
+  ConfigModule.register();
+  WindowModule.register();
+  SystemModule.register();
+  UpdateModule.register();
+  CoreModule.register();
+  AppsModule.register();
+
+  // Initialize tRPC with new domain-based router
   const { createIPCHandler } = await import('electron-trpc-experimental/main');
   createIPCHandler({ router: appRouter });
 
@@ -35,38 +41,27 @@ export async function initApp(initConfig: AppInitConfig) {
     callback(true);
   });
 
-  // Initialize services that need to run before app is ready
-  const singleInstanceApp = container.resolve(SingleInstanceApp);
-  singleInstanceApp.initialize();
+  // Services auto-initialize when resolved from container (constructor-based initialization)
+  // Order matters for some dependencies
 
-  const hardwareAcceleration = container.resolve(HardwareAccelerationModule);
-  hardwareAcceleration.initialize();
+  // System services
+  SystemModule.getInstanceService();
+  SystemModule.getBackgroundService();
 
-  // Initialize core services (order matters - some depend on others being ready)
-  const windowManager = container.resolve(WindowManager);
-  await windowManager.initialize();
+  // System UI services
+  SystemModule.getTrayService();
+  SystemModule.getMenuService();
 
-  const backgroundOperationManager = container.resolve(BackgroundOperationManager);
-  backgroundOperationManager.initialize();
+  // Auto-start and update services
+  SystemModule.getAutoStartService();
+  UpdateModule.getService();
 
-  const configurationManager = container.resolve(ConfigurationManager);
-  await configurationManager.initialize();
+  // Config and apps services
+  ConfigModule.getService();
+  AppsModule.getService();
 
-  const basicAuthManager = container.resolve(BasicAuthManager);
-  await basicAuthManager.initialize();
+  // Core application service
+  CoreModule.getService();
 
-  // Connect BasicAuthManager with WindowManager
-  basicAuthManager.setWindowManager(windowManager);
-
-  const menuManager = container.resolve(MenuManager);
-  await menuManager.initialize();
-
-  const trayManager = container.resolve(TrayManager);
-  await trayManager.initialize();
-
-  const autoStartManager = container.resolve(AutoStartManager);
-  await autoStartManager.initialize();
-
-  const autoUpdater = container.resolve(AutoUpdater);
-  await autoUpdater.initialize();
+  console.log('[App] All domain modules initialized successfully');
 }

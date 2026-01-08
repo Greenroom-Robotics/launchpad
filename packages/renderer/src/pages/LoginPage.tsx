@@ -7,7 +7,8 @@ import { trpc } from '../trpc-react';
 import { TexturedPanel } from '../components/TexturedPanel';
 
 interface LoginPageProps {
-  challengeId: string;
+  url: string;
+  realm?: string;
 }
 
 const loginSchema: RJSFSchema = {
@@ -35,33 +36,27 @@ const uiSchema = {
   },
 };
 
-export const LoginPage: React.FC<LoginPageProps> = ({ challengeId }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ url, realm }) => {
   const [error, setError] = useState<string>('');
 
-  // Get challenge details
-  const {
-    data: challenge,
-    isLoading,
-    error: loadingError,
-  } = trpc.app.getChallengeDetails.useQuery(challengeId);
-
-  const submitCredentials = trpc.app.submitLoginCredentials.useMutation({
+  const submitCredentials = trpc.auth.submitLoginCredentials.useMutation({
     onSuccess: () => {
       console.log('Credentials submitted successfully');
-      // Close the login window on successful authentication
-      window.close();
+      // Don't close window here - let the backend handle it via resolveLoginChallenge
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       console.error('Error submitting credentials:', error);
       setError(error.message || 'Authentication failed');
     },
   });
 
-  const cancelLogin = trpc.app.cancelLogin.useMutation({
+  const cancelLogin = trpc.auth.cancelLogin.useMutation({
     onSuccess: () => {
       console.log('Login cancelled');
       window.close();
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       console.error('Error cancelling login:', error);
       window.close();
@@ -77,7 +72,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ challengeId }) => {
       setError(''); // Clear any previous errors
 
       await submitCredentials.mutateAsync({
-        challengeId,
+        url,
         username: credentials.username,
         password: credentials.password,
         remember: credentials.remember,
@@ -89,29 +84,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ challengeId }) => {
   };
 
   const handleCancel = () => {
-    cancelLogin.mutate({ challengeId });
+    cancelLogin.mutate({ url });
   };
 
-  if (isLoading) {
-    return (
-      <TexturedPanel fill>
-        <Box align="center" justify="center" fill>
-          <Text>Loading authentication details...</Text>
-        </Box>
-      </TexturedPanel>
-    );
-  }
-
-  if (loadingError || !challenge) {
-    return (
-      <TexturedPanel fill>
-        <Box align="center" justify="center" fill>
-          <Text color="status-error">Error loading authentication challenge</Text>
-          <Text size="small">{loadingError?.message || 'Challenge not found'}</Text>
-        </Box>
-      </TexturedPanel>
-    );
-  }
+  // No loading states needed - data comes from query parameters
 
   return (
     <TexturedPanel fill direction="row">
@@ -131,7 +107,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ challengeId }) => {
           <Heading level={3} margin={{ top: 'none', bottom: 'small' }}>
             Login
           </Heading>
-          <Text size="small">Host: {challenge.url}</Text>
+          <Text size="small">Host: {url}</Text>
+          {realm && <Text size="small">Realm: {realm}</Text>}
         </Box>
         {error && (
           <Box flex={false} pad="small" background="status-error">
