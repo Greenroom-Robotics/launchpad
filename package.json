@@ -33,7 +33,7 @@
     "@types/node": "25.0.3",
     "create-vite": "8.2.0",
     "electron": "39.2.7",
-    "electron-builder": "26.0.13",
+    "electron-builder": "26.4.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "glob": "13.0.0",
