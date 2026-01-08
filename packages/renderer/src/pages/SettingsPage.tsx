@@ -1,144 +1,58 @@
-import { Box, Text } from 'grommet';
+import { memo } from 'react';
+import { Link, Route, Routes, useLocation, Navigate } from 'react-router';
+import { Box, Button, Nav } from 'grommet';
 import { Header } from '../components/layout/Header';
-import { SchemaForm } from '@greenroom-robotics/alpha.schema-form';
-import { useConfig } from '../hooks/useConfig';
-import { useAsyncFn } from 'react-use';
-import type { RJSFSchema } from '@greenroom-robotics/alpha.schema-form';
-import type { LaunchpadConfig } from '@app/shared';
+import { AppSettingsPage } from './AppSettingsPage';
+import { AuthSettingsPage } from './AuthSettingsPage';
+import { GeneralSettingsPage } from './GeneralSettingsPage';
 
-interface ExtendedRJSFSchema extends RJSFSchema {
-  enumNames?: string[];
-  properties?: Record<string, ExtendedRJSFSchema>;
-  items?: ExtendedRJSFSchema;
-}
-
-const applicationConfigSchema: ExtendedRJSFSchema = {
-  type: 'object',
-  properties: {
-    applications: {
-      type: 'array',
-      title: 'Application',
-      items: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            title: 'ID',
-            description: 'Unique identifier for this application instance',
-          },
-          name: {
-            type: 'string',
-            title: 'Display Name',
-            description: 'Name to show in the launcher',
-          },
-          type: {
-            type: 'string',
-            title: 'Application Type',
-            enum: ['gama', 'lookout', 'marops', 'missim'],
-            enumNames: ['GAMA', 'Lookout+', 'MarOps', 'MIS-SIM'],
-          },
-          url: {
-            type: 'string',
-            format: 'uri',
-            title: 'URL',
-            description: 'Full URL including protocol and port (e.g., http://localhost:3000)',
-          },
-          description: {
-            type: 'string',
-            title: 'Description',
-            description: 'Optional description for this instance',
-          },
-          enabled: {
-            type: 'boolean',
-            title: 'Enabled',
-            default: true,
-            description: 'Whether this application should be shown in the launcher',
-          },
-        },
-        required: ['id', 'name', 'type', 'url'],
-      },
-    },
-  },
-  required: ['applications'],
-};
-
-export const SettingsPage = () => {
-  const { applications, updateConfig } = useConfig();
-
-  // Use useAsyncFn for form submission with built-in loading/error states
-  const [submitState, handleSubmit] = useAsyncFn(
-    async (data: LaunchpadConfig) => {
-      await updateConfig.mutateAsync(data);
-      console.log('Configuration saved successfully');
-      return data;
-    },
-    [updateConfig]
-  );
-
-  if (applications.isLoading) {
-    return (
-      <Box fill>
-        <Header title="Launchpad - Settings" />
-        <Box align="center" justify="center" fill>
-          <Text>Loading configuration...</Text>
-        </Box>
-      </Box>
-    );
-  }
-
-  if (applications.error) {
-    return (
-      <Box fill>
-        <Header title="Launchpad - Settings" />
-        <Box align="center" justify="center" fill>
-          <Text color="status-error">Error: {applications.error.message}</Text>
-        </Box>
-      </Box>
-    );
-  }
-
-  const currentConfig = { applications: applications.data || [] };
-  const { loading: isSaving, error: submitError, value: savedConfig } = submitState;
+export const SettingsPage = memo(() => {
+  const location = useLocation();
 
   return (
     <Box fill>
-      <Header title="Launchpad - Settings" />
-      <Box margin={{ horizontal: 'medium', bottom: 'medium' }} overflow="auto">
-        {/* Show save status */}
-        {isSaving && (
-          <Box pad="small" background="status-unknown" margin={{ bottom: 'small' }}>
-            <Text color="white">Saving configuration...</Text>
+      <Header title="Launchpad - Settings" border={{ side: 'bottom', size: '2px' }} />
+      <Box fill direction="row">
+        <Nav
+          border={{ side: 'right', size: '2px' }}
+          pad={{ top: 'small' }}
+          gap="none"
+          height={{ min: '100%' }}
+          width="220px"
+          flex={false}
+        >
+          <Link to="/settings/apps">
+            <Button
+              label="Apps"
+              color={location?.pathname === '/settings/apps' ? 'green' : 'white'}
+            />
+          </Link>
+          <Link to="/settings/auth">
+            <Button
+              label="Authentication"
+              color={location?.pathname === '/settings/auth' ? 'green' : 'white'}
+            />
+          </Link>
+          <Link to="/settings/general">
+            <Button
+              label="General"
+              color={location?.pathname === '/settings/general' ? 'green' : 'white'}
+            />
+          </Link>
+        </Nav>
+        <Box fill overflow="auto">
+          <Box pad="medium" flex={false}>
+            <Routes>
+              <Route path="/" element={<Navigate to="apps" replace />} />
+              <Route path="apps" element={<AppSettingsPage />} />
+              <Route path="auth" element={<AuthSettingsPage />} />
+              <Route path="general" element={<GeneralSettingsPage />} />
+            </Routes>
           </Box>
-        )}
-        {submitError && (
-          <Box pad="small" background="status-error" margin={{ bottom: 'small' }}>
-            <Text color="white">Error saving: {submitError.message}</Text>
-          </Box>
-        )}
-        {savedConfig && !isSaving && !submitError && (
-          <Box pad="small" background="status-ok" margin={{ bottom: 'small' }}>
-            <Text color="white">Configuration saved successfully!</Text>
-          </Box>
-        )}
-
-        <SchemaForm
-          schema={applicationConfigSchema}
-          uiSchema={{
-            applications: {
-              items: {
-                'ui:options': {
-                  numColumns: 2,
-                  defaultCollapsed: true,
-                  titleFieldPath: 'id',
-                },
-              },
-            },
-          }}
-          formData={currentConfig}
-          onSubmit={handleSubmit}
-          disabled={isSaving}
-        />
+        </Box>
       </Box>
     </Box>
   );
-};
+});
+
+SettingsPage.displayName = 'SettingsPage';

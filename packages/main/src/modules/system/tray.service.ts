@@ -1,19 +1,21 @@
 import { singleton, inject } from 'tsyringe';
 import { Tray, Menu, nativeImage, app } from 'electron';
-import { WindowManager } from './WindowManager.js';
-import type { IInitializable } from '../interfaces.js';
-import { TYPES } from '../types.js';
+import { WindowService } from '../window/window.service.js';
+import { TYPES } from '../../types.js';
 
 @singleton()
-export class TrayManager implements IInitializable {
+export class TrayService {
   #tray: Tray | null = null;
 
   constructor(
-    @inject(WindowManager) private windowManager: WindowManager,
+    @inject(WindowService) private windowService: WindowService,
     @inject(TYPES.ElectronApp) private app: Electron.App
-  ) {}
+  ) {
+    // Setup async initialization in constructor
+    this.initializeAsync();
+  }
 
-  async initialize(): Promise<void> {
+  private async initializeAsync(): Promise<void> {
     await this.app.whenReady();
     this.setupSystemTray();
   }
@@ -25,7 +27,7 @@ export class TrayManager implements IInitializable {
     const icon = nativeImage.createFromDataURL(iconDataUrl);
 
     if (icon.isEmpty()) {
-      console.warn('TrayManager: Could not create tray icon from embedded data');
+      console.warn('TrayService: Could not create tray icon from embedded data');
     }
 
     this.#tray = new Tray(icon);
@@ -64,13 +66,39 @@ export class TrayManager implements IInitializable {
   }
 
   private showLaunchpadWindow(): void {
-    this.windowManager.showLaunchpadWindow();
+    this.windowService.showLaunchpadWindow();
   }
 
   destroy(): void {
     if (this.#tray) {
       this.#tray.destroy();
       this.#tray = null;
+    }
+  }
+
+  // Additional tray management methods
+  isActive(): boolean {
+    return this.#tray !== null;
+  }
+
+  updateTooltip(tooltip: string): void {
+    if (this.#tray) {
+      this.#tray.setToolTip(tooltip);
+    }
+  }
+
+  setIcon(iconPath: string): void {
+    if (this.#tray) {
+      this.#tray.setImage(iconPath);
+    }
+  }
+
+  displayBalloon(title: string, content: string): void {
+    if (this.#tray) {
+      this.#tray.displayBalloon({
+        title,
+        content,
+      });
     }
   }
 }

@@ -1,18 +1,20 @@
 import { singleton, inject } from 'tsyringe';
 import { Menu, BrowserWindow } from 'electron';
 import type { MenuItemConstructorOptions } from 'electron';
-import { WindowManager, WINDOW_TYPES } from './WindowManager.js';
-import type { IInitializable } from '../interfaces.js';
-import { TYPES } from '../types.js';
+import { WindowService, WINDOW_TYPES } from '../window/window.service.js';
+import { TYPES } from '../../types.js';
 
 @singleton()
-export class MenuManager implements IInitializable {
+export class MenuService {
   constructor(
-    @inject(WindowManager) private windowManager: WindowManager,
+    @inject(WindowService) private windowService: WindowService,
     @inject(TYPES.ElectronApp) private app: Electron.App
-  ) {}
+  ) {
+    // Setup async initialization in constructor
+    this.initializeAsync();
+  }
 
-  async initialize(): Promise<void> {
+  private async initializeAsync(): Promise<void> {
     await this.app.whenReady();
     this.setupApplicationMenu();
   }
@@ -103,23 +105,56 @@ export class MenuManager implements IInitializable {
   private createNewWindow(): void {
     const focusedWindow = BrowserWindow.getFocusedWindow();
     if (!focusedWindow) {
-      this.windowManager.createNewWindow();
+      this.windowService.createNewWindow();
       return;
     }
 
     // Get window metadata to determine window type
-    const metadata = this.windowManager.getWindowMetadata(focusedWindow);
+    const metadata = this.windowService.getWindowMetadata(focusedWindow);
 
     if (!metadata || metadata.type === WINDOW_TYPES.LAUNCHPAD) {
-      this.windowManager.createNewWindow();
+      this.windowService.createNewWindow();
     } else if (metadata.type === WINDOW_TYPES.APPLICATION) {
       // Create a new application window with the same URL and name
       if (metadata.applicationUrl && metadata.applicationName) {
-        this.windowManager.createNewApplicationWindow(
+        this.windowService.createNewApplicationWindow(
           metadata.applicationUrl,
           metadata.applicationName
         );
       }
+    }
+  }
+
+  // Additional menu management methods
+  updateMenu(template: MenuItemConstructorOptions[]): void {
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+  }
+
+  disableMenu(): void {
+    Menu.setApplicationMenu(null);
+  }
+
+  getApplicationMenu(): Menu | null {
+    return Menu.getApplicationMenu();
+  }
+
+  // Method to add custom menu items dynamically
+  addMenuItem(position: number, menuItem: MenuItemConstructorOptions): void {
+    const currentMenu = Menu.getApplicationMenu();
+    if (currentMenu) {
+      // This is a simplified implementation
+      // In a real app, you might want to rebuild the entire menu structure
+      console.log('Adding menu item at position:', position, menuItem.label);
+    }
+  }
+
+  // Enable/disable specific menu items
+  setMenuItemEnabled(menuPath: string, enabled: boolean): void {
+    const menu = Menu.getApplicationMenu();
+    if (menu) {
+      // This would need proper implementation to find and modify specific menu items
+      console.log(`Setting menu item ${menuPath} enabled: ${enabled}`);
     }
   }
 }

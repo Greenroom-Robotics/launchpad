@@ -1,12 +1,10 @@
 import { singleton } from 'tsyringe';
 import Store from 'electron-store';
-import { net } from 'electron';
 import type { ApplicationInstance, LaunchpadConfig } from '@app/shared';
 import { defaultConfig } from '@app/shared';
-import type { IInitializable } from '../interfaces.js';
 
 @singleton()
-export class ConfigurationManager implements IInitializable {
+export class ConfigStore {
   private store: Store<LaunchpadConfig>;
 
   constructor() {
@@ -36,10 +34,6 @@ export class ConfigurationManager implements IInitializable {
     });
   }
 
-  async initialize(): Promise<void> {
-    // IPC handlers have been migrated to tRPC
-  }
-
   getApplications(): ApplicationInstance[] {
     return this.store.get('applications', defaultConfig.applications);
   }
@@ -63,41 +57,49 @@ export class ConfigurationManager implements IInitializable {
     return this.getConfig();
   }
 
-  async checkConnectivity(url: string): Promise<{ connected: boolean; error?: string }> {
-    try {
-      // First check if we have basic network connectivity
-      if (!net.isOnline()) {
-        return { connected: false, error: 'No network connection' };
-      }
+  // Additional utility methods
+  getApplication(id: string): ApplicationInstance | undefined {
+    const applications = this.getApplications();
+    return applications.find((app) => app.id === id);
+  }
 
-      // Create a request to test the URL
-      const request = net.request(url);
+  updateApplication(id: string, updates: Partial<ApplicationInstance>): boolean {
+    const applications = this.getApplications();
+    const index = applications.findIndex((app) => app.id === id);
 
-      return new Promise((resolve) => {
-        const timeout = setTimeout(() => {
-          request.abort();
-          resolve({ connected: false, error: 'Connection timeout' });
-        }, 5000); // 5 second timeout
-
-        request.on('response', () => {
-          clearTimeout(timeout);
-          // Consider any response (even 404) as connected, since the server is responding
-          resolve({ connected: true });
-        });
-
-        request.on('error', (error) => {
-          clearTimeout(timeout);
-          resolve({ connected: false, error: error.message });
-        });
-
-        // Use HEAD request to avoid downloading content
-        request.end();
-      });
-    } catch (error) {
-      return {
-        connected: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+    if (index === -1) {
+      return false;
     }
+
+    applications[index] = { ...applications[index], ...updates };
+    this.setApplications(applications);
+    return true;
+  }
+
+  addApplication(application: ApplicationInstance): void {
+    const applications = this.getApplications();
+    applications.push(application);
+    this.setApplications(applications);
+  }
+
+  removeApplication(id: string): boolean {
+    const applications = this.getApplications();
+    const index = applications.findIndex((app) => app.id === id);
+
+    if (index === -1) {
+      return false;
+    }
+
+    applications.splice(index, 1);
+    this.setApplications(applications);
+    return true;
+  }
+
+  getEnabledApplications(): ApplicationInstance[] {
+    return this.getApplications().filter((app) => app.enabled);
+  }
+
+  getApplicationsByType(type: ApplicationInstance['type']): ApplicationInstance[] {
+    return this.getApplications().filter((app) => app.type === type);
   }
 }

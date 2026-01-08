@@ -19,6 +19,6 @@ export function useConfig() {
     resetToDefault: trpc.config.resetToDefault.useMutation({
       onSuccess: invalidateConfig,
     }),
-    openApplication: trpc.app.openApplication.useMutation(),
+    launchApp: trpc.apps.launchApp.useMutation(),
   };
 }

@@ -1,24 +1,17 @@
 import { singleton, inject } from 'tsyringe';
-import { TYPES } from '../types.js';
+import { TYPES } from '../../types.js';
 import { BrowserWindow } from 'electron';
-import type { AppInitConfig } from '../AppInitConfig.js';
-import type { IInitializable } from '../interfaces.js';
+import type { AppInitConfig } from '../../AppInitConfig.js';
+import { AuthService, UserCancelledAuthError } from '../auth/auth.service.js';
+import type { WindowMetadata } from '@app/shared';
 
 const WINDOW_TYPES = {
   LAUNCHPAD: 'launchpad',
   APPLICATION: 'application',
 } as const;
 
-type WindowType = (typeof WINDOW_TYPES)[keyof typeof WINDOW_TYPES];
-
-interface WindowMetadata {
-  type: WindowType;
-  applicationName?: string;
-  applicationUrl?: string;
-}
-
 @singleton()
-export class WindowManager implements IInitializable {
+export class WindowService {
   readonly #preload: { path: string };
   readonly #renderer: { path: string } | URL;
   readonly #openDevTools;
@@ -27,14 +20,18 @@ export class WindowManager implements IInitializable {
 
   constructor(
     @inject(TYPES.AppInitConfig) initConfig: AppInitConfig,
-    @inject(TYPES.ElectronApp) private app: Electron.App
+    @inject(TYPES.ElectronApp) private app: Electron.App,
+    @inject(AuthService) private authService: AuthService
   ) {
     this.#preload = initConfig.preload;
     this.#renderer = initConfig.renderer;
     this.#openDevTools = false;
+
+    // Setup async initialization in constructor
+    this.initializeAsync();
   }
 
-  async initialize(): Promise<void> {
+  private async initializeAsync(): Promise<void> {
     await this.app.whenReady();
     await this.restoreOrCreateWindow(true);
     this.app.on('second-instance', () => this.restoreOrCreateWindow(true));
@@ -96,7 +93,33 @@ export class WindowManager implements IInitializable {
     return window;
   }
 
-  async createApplicationWindow(url: string, applicationName: string): Promise<BrowserWindow> {
+  /**
+   * Simple auth setup for windows that already have credentials
+   */
+  private setupBasicAuthWithCredentials(
+    browserWindow: BrowserWindow,
+    url: string,
+    credentials: { username: string; password: string }
+  ): void {
+    console.log(`[WindowService] Setting up basic auth for ${url} with provided credentials`);
+
+    browserWindow.webContents.on(
+      'login',
+      (event, _authenticationResponseDetails, _authInfo, callback) => {
+        console.log(`[WindowService] Using provided credentials for ${url}`);
+        event.preventDefault();
+        callback(credentials.username, credentials.password);
+      }
+    );
+  }
+
+  // The old complex setupBasicAuth method has been removed
+  // Auth is now handled before window creation via AuthService.checkAuthAndGetCredentials
+
+  async createApplicationWindow(
+    url: string,
+    applicationName: string
+  ): Promise<BrowserWindow | undefined> {
     // Check if window already exists for this application
     const existingWindow = this.#applicationWindows.get(applicationName);
     if (existingWindow && !existingWindow.isDestroyed()) {
@@ -108,6 +131,29 @@ export class WindowManager implements IInitializable {
       return existingWindow;
     }
 
+    console.log(`[WindowService] Creating application window for ${applicationName} at ${url}`);
+
+    // Check if authentication is required and get credentials
+    let credentials: any = null;
+    try {
+      credentials = await this.authService.checkAuthAndGetCredentials(url);
+      console.log(
+        `[WindowService] Auth check result for ${url}: ${credentials ? 'credentials obtained' : 'no auth required'}`
+      );
+    } catch (error: unknown) {
+      if (error instanceof UserCancelledAuthError) {
+        console.log(
+          `[WindowService] User cancelled authentication for ${url} - not creating window`
+        );
+        return; // Gracefully exit without creating window
+      }
+      // Handle actual auth errors (validation failures, network errors, etc.)
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      console.error(`[WindowService] Authentication failed for ${url}:`, errorMessage);
+      throw new Error(`Authentication failed: ${errorMessage}`);
+    }
+
+    // Create the browser window
     const browserWindow = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -117,7 +163,7 @@ export class WindowManager implements IInitializable {
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: false,
-        webSecurity: true, // Keep web security for external URLs
+        webSecurity: false, // Disable web security to allow invalid SSL certificates
         preload: this.#preload.path,
       },
     });
@@ -131,6 +177,11 @@ export class WindowManager implements IInitializable {
 
     // Store window reference before loading
     this.#applicationWindows.set(applicationName, browserWindow);
+
+    // If we have credentials, set up basic auth for this window
+    if (credentials) {
+      this.setupBasicAuthWithCredentials(browserWindow, url, credentials);
+    }
 
     // Clean up when window is closed
     browserWindow.on('closed', () => {
@@ -160,12 +211,14 @@ export class WindowManager implements IInitializable {
     try {
       // Load the application URL
       await browserWindow.loadURL(url);
-    } catch (error) {
+      console.log(`[WindowService] Successfully loaded ${url} in window for ${applicationName}`);
+    } catch (error: unknown) {
       console.error(`Error loading URL ${url}:`, error);
-      // Show window even if load fails
+      // Show window even if load fails (for other errors)
       if (!browserWindow.isDestroyed()) {
         browserWindow.show();
       }
+      throw error;
     }
 
     return browserWindow;
@@ -220,7 +273,32 @@ export class WindowManager implements IInitializable {
     }
   }
 
-  async createNewApplicationWindow(url: string, applicationName: string): Promise<BrowserWindow> {
+  async createNewApplicationWindow(
+    url: string,
+    applicationName: string
+  ): Promise<BrowserWindow | undefined> {
+    console.log(`[WindowService] Creating new application window for ${applicationName} at ${url}`);
+
+    // Check if authentication is required and get credentials
+    let credentials: any = null;
+    try {
+      credentials = await this.authService.checkAuthAndGetCredentials(url);
+      console.log(
+        `[WindowService] Auth check result for ${url}: ${credentials ? 'credentials obtained' : 'no auth required'}`
+      );
+    } catch (error: unknown) {
+      if (error instanceof UserCancelledAuthError) {
+        console.log(
+          `[WindowService] User cancelled authentication for ${url} - not creating window`
+        );
+        return; // Gracefully exit without creating window
+      }
+      // Handle actual auth errors (validation failures, network errors, etc.)
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      console.error(`[WindowService] Authentication failed for ${url}:`, errorMessage);
+      throw new Error(`Authentication failed: ${errorMessage}`);
+    }
+
     // Always create a new window, don't check for existing ones
     const browserWindow = new BrowserWindow({
       width: 1200,
@@ -231,7 +309,7 @@ export class WindowManager implements IInitializable {
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: false,
-        webSecurity: true, // Keep web security for external URLs
+        webSecurity: false, // Disable web security to allow invalid SSL certificates
         preload: this.#preload.path,
       },
     });
@@ -242,6 +320,11 @@ export class WindowManager implements IInitializable {
       applicationName: applicationName,
       applicationUrl: url,
     });
+
+    // If we have credentials, set up basic auth for this window
+    if (credentials) {
+      this.setupBasicAuthWithCredentials(browserWindow, url, credentials);
+    }
 
     // Open dev tools if needed
     if (this.#openDevTools) {
@@ -259,8 +342,12 @@ export class WindowManager implements IInitializable {
     try {
       // Load the application URL
       await browserWindow.loadURL(url);
+      console.log(
+        `[WindowService] Successfully loaded ${url} in new window for ${applicationName}`
+      );
     } catch (error) {
       console.error(`Error loading URL ${url}:`, error);
+      throw error;
     }
 
     return browserWindow;

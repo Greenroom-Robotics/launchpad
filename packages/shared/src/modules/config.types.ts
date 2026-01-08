@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// Core application configuration schemas
 export const ApplicationInstanceSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -48,3 +49,21 @@ export const defaultConfig: LaunchpadConfig = {
     },
   ],
 };
+
+// Connectivity check schemas
+export const ConnectivityCheckRequestSchema = z.string();
+
+export const ConnectivityCheckResponseSchema = z.object({
+  connected: z.boolean(),
+  error: z.string().optional(),
+});
+
+// Reset response schema
+export const ResetToDefaultResponseSchema = z.object({
+  applications: z.array(ApplicationInstanceSchema),
+});
+
+// Type exports
+export type ConnectivityCheckRequest = z.infer<typeof ConnectivityCheckRequestSchema>;
+export type ConnectivityCheckResponse = z.infer<typeof ConnectivityCheckResponseSchema>;
+export type ResetToDefaultResponse = z.infer<typeof ResetToDefaultResponseSchema>;

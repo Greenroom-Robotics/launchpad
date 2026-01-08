@@ -47,7 +47,7 @@ export const ApplicationTile = ({
   // Use useInterval for periodic connectivity checks (every 30 seconds)
   useInterval(() => {
     checkConnection();
-  }, 30000);
+  }, 30 * 1000);
 
   const { loading, value } = connectivityState;
   const connected = value?.connected ?? false;
