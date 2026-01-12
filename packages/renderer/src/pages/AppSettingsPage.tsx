@@ -31,6 +31,11 @@ const applicationConfigSchema: ExtendedRJSFSchema = {
             title: 'Display Name',
             description: 'Name to show in the launcher',
           },
+          vesselName: {
+            type: 'string',
+            title: 'Vessel Name',
+            description: 'Optional vessel name associated with this application',
+          },
           type: {
             type: 'string',
             title: 'Application Type',
@@ -119,7 +124,7 @@ export const AppSettingsPage = () => {
           applications: {
             items: {
               'ui:options': {
-                numColumns: 2,
+                numColumns: 3,
                 defaultCollapsed: true,
                 titleFieldPath: 'id',
               },

@@ -8,6 +8,7 @@ export const ApplicationInstanceSchema = z.object({
   url: z.string(),
   description: z.string().optional(),
   enabled: z.boolean(),
+  vesselName: z.string().optional(),
 });
 
 export const LaunchpadConfigSchema = z.object({
@@ -25,6 +26,7 @@ export const defaultConfig: LaunchpadConfig = {
       type: 'gama',
       url: 'http://localhost:3000',
       enabled: true,
+      vesselName: 'Development',
     },
     {
       id: 'local-lookout',
@@ -32,6 +34,7 @@ export const defaultConfig: LaunchpadConfig = {
       type: 'lookout',
       url: 'http://localhost:4000',
       enabled: true,
+      vesselName: 'Development',
     },
     {
       id: 'local-marops',
@@ -39,6 +42,7 @@ export const defaultConfig: LaunchpadConfig = {
       type: 'marops',
       url: 'http://localhost:7000',
       enabled: true,
+      vesselName: 'Development',
     },
     {
       id: 'local-missim',
@@ -46,6 +50,7 @@ export const defaultConfig: LaunchpadConfig = {
       type: 'missim',
       url: 'http://localhost:5000',
       enabled: true,
+      vesselName: 'Development',
     },
   ],
 };
