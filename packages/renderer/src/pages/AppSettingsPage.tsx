@@ -1,9 +1,9 @@
-import { Box, Text } from 'grommet';
+import { Box, Text, Button, Heading } from 'grommet';
 import { SchemaForm } from '@greenroom-robotics/alpha.schema-form';
 import { useConfig } from '../hooks/useConfig';
 import { useAsyncFn } from 'react-use';
 import type { RJSFSchema } from '@greenroom-robotics/alpha.schema-form';
-import type { LaunchpadConfig } from '@app/shared';
+import type { ApplicationInstance, LaunchpadConfig } from '@app/shared';
 import { CollapsiblePanel } from '@greenroom-robotics/alpha.ui/build/components';
 
 interface ExtendedRJSFSchema extends RJSFSchema {
@@ -68,7 +68,7 @@ const applicationConfigSchema: ExtendedRJSFSchema = {
 };
 
 export const AppSettingsPage = () => {
-  const { applications, updateConfig } = useConfig();
+  const { applications, discoveredApplications, updateApplications, updateConfig } = useConfig();
 
   // Use useAsyncFn for form submission with built-in loading/error states
   const [submitState, handleSubmit] = useAsyncFn(
@@ -79,6 +79,31 @@ export const AppSettingsPage = () => {
     },
     [updateConfig]
   );
+
+  // Add a discovered service to the configured applications
+  const handleAddDiscovered = async (discovered: ApplicationInstance) => {
+    const currentApps = applications.data || [];
+    // Check if already exists by URL
+    if (currentApps.some((app) => app.url.toLowerCase() === discovered.url.toLowerCase())) {
+      return; // Already configured
+    }
+    // Use discovered vesselName, or fall back to the display name
+    const vesselName = discovered.vesselName || discovered.name;
+    const newApp: ApplicationInstance = {
+      id: discovered.id.replace('discovered-', ''),
+      name: discovered.name,
+      type: discovered.type,
+      url: discovered.url,
+      description: discovered.description,
+      enabled: true,
+      vesselName,
+    };
+    await updateApplications.mutateAsync([...currentApps, newApp]);
+  };
+
+  // Check if a discovered service is already configured
+  const isAlreadyConfigured = (discovered: ApplicationInstance) =>
+    (applications.data || []).some((app) => app.url.toLowerCase() === discovered.url.toLowerCase());
 
   if (applications.isLoading) {
     return (
@@ -101,6 +126,73 @@ export const AppSettingsPage = () => {
 
   return (
     <CollapsiblePanel label="Application Settings" defaultOpen>
+      <Heading margin={{ top: 'none', bottom: 'small' }} level={4}>
+        Auto-Discovered
+      </Heading>
+      <Text>
+        Greenroom apps on your LAN will be auto-discovered and appear here. If they are not on the
+        LAN, you'll need to add them manually below.
+      </Text>
+      <br />
+
+      {(discoveredApplications.data || []).length === 0 ? (
+        <Box pad="medium" background="background-contrast" round="small">
+          <Text color="text-weak" textAlign="center">
+            No services discovered. Ensure target hosts have Avahi configured.
+          </Text>
+        </Box>
+      ) : (
+        <Box gap="small">
+          {(discoveredApplications.data || []).map((discovered) => {
+            const configured = isAlreadyConfigured(discovered);
+            return (
+              <Box key={discovered.id} background="background-contrast" pad="small" border>
+                <Box direction="row" justify="between" align="center">
+                  <Box>
+                    <Box direction="row" gap="small" align="center">
+                      <Text weight="bold">{discovered.name}</Text>
+                      <Text size="xsmall" color="text-weak">
+                        {discovered.type.toUpperCase()}
+                      </Text>
+                      {configured && (
+                        <Text size="xsmall" color="green">
+                          CONFIGURED BELOW
+                        </Text>
+                      )}
+                    </Box>
+                    <Box direction="row" gap="small">
+                      <Text size="small" color="text-weak">
+                        {discovered.url}
+                      </Text>
+                      {discovered.vesselName && (
+                        <Text size="small" color="text-weak">
+                          | Vessel: {discovered?.vesselName}
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                  {!configured && (
+                    <Button
+                      icon={<Text size="large">+</Text>}
+                      size="small"
+                      primary
+                      onClick={() => handleAddDiscovered(discovered)}
+                      label="Add Application"
+                      color="brand"
+                    />
+                  )}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+
+      <Heading margin={{ top: 'medium', bottom: 'small' }} level={4}>
+        App Configuration Details
+      </Heading>
+      <Text>Manually specify the Greenroom app type and host.</Text>
+      <br />
       {/* Show save status */}
       {isSaving && (
         <Box pad="small" background="status-unknown" margin={{ bottom: 'small' }}>
@@ -113,7 +205,12 @@ export const AppSettingsPage = () => {
         </Box>
       )}
       {savedConfig && !isSaving && !submitError && (
-        <Box pad="small" background="status-ok" margin={{ bottom: 'small' }}>
+        <Box
+          pad="small"
+          background="green"
+          margin={{ bottom: 'small' }}
+          border={{ color: 'white' }}
+        >
           <Text color="white">Configuration saved successfully!</Text>
         </Box>
       )}

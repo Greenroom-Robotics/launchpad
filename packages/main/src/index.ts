@@ -9,6 +9,7 @@ import { SystemModule } from './modules/system/index.js';
 import { UpdateModule } from './modules/update/index.js';
 import { CoreModule } from './modules/core/index.js';
 import { AppsModule } from './modules/apps/index.js';
+import { DiscoveryModule } from './modules/discovery/index.js';
 import { appRouter } from './trpc/router.js';
 
 export type { AppRouter } from './trpc/router.js';
@@ -25,6 +26,7 @@ export async function initApp(initConfig: AppInitConfig) {
   UpdateModule.register();
   CoreModule.register();
   AppsModule.register();
+  DiscoveryModule.register();
 
   // Initialize tRPC with new domain-based router
   const { createIPCHandler } = await import('electron-trpc-experimental/main');
@@ -56,9 +58,10 @@ export async function initApp(initConfig: AppInitConfig) {
   SystemModule.getAutoStartService();
   UpdateModule.getService();
 
-  // Config and apps services
+  // Config, apps, and discovery services
   ConfigModule.getService();
   AppsModule.getService();
+  DiscoveryModule.getService();
 
   // Core application service
   CoreModule.getService();

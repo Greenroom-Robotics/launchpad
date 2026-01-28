@@ -6,6 +6,7 @@ import { SystemModule } from '../modules/system/index.js';
 import { UpdateModule } from '../modules/update/index.js';
 import { CoreModule } from '../modules/core/index.js';
 import { AppsModule } from '../modules/apps/index.js';
+import { DiscoveryModule } from '../modules/discovery/index.js';
 
 export const appRouter = router({
   auth: AuthModule.getRouter(),
@@ -15,6 +16,7 @@ export const appRouter = router({
   update: UpdateModule.getRouter(),
   core: CoreModule.getRouter(),
   apps: AppsModule.getRouter(),
+  discovery: DiscoveryModule.getRouter(),
 });
 
 export type AppRouter = typeof appRouter;

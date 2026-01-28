@@ -19,6 +19,7 @@
     "@app/shared": "*",
     "@trpc/server": "11.8.1",
     "axios": "^1.13.2",
+    "bonjour-service": "^1.3.0",
     "electron-store": "^11.0.2",
     "electron-trpc-experimental": "1.0.0-alpha.1",
     "electron-updater": "6.6.2",
