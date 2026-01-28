@@ -99,7 +99,9 @@ export class DiscoveryService {
     const serviceName = service.name?.replace(/%h/g, hostname);
 
     // Generate a unique ID for this service instance
-    const id = `discovered-${productType}-${serviceName}-${host}`.toLowerCase().replace(/\s+/g, '-');
+    const id = `discovered-${productType}-${serviceName}-${host}`
+      .toLowerCase()
+      .replace(/\s+/g, '-');
 
     const url = `${protocol}://${host}:${service.port}${path}`;
 

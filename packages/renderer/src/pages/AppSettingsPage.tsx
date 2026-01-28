@@ -68,12 +68,7 @@ const applicationConfigSchema: ExtendedRJSFSchema = {
 };
 
 export const AppSettingsPage = () => {
-  const {
-    applications,
-    discoveredApplications,
-    updateApplications,
-    updateConfig,
-  } = useConfig();
+  const { applications, discoveredApplications, updateApplications, updateConfig } = useConfig();
 
   // Use useAsyncFn for form submission with built-in loading/error states
   const [submitState, handleSubmit] = useAsyncFn(
@@ -108,9 +103,7 @@ export const AppSettingsPage = () => {
 
   // Check if a discovered service is already configured
   const isAlreadyConfigured = (discovered: ApplicationInstance) =>
-    (applications.data || []).some(
-      (app) => app.url.toLowerCase() === discovered.url.toLowerCase()
-    );
+    (applications.data || []).some((app) => app.url.toLowerCase() === discovered.url.toLowerCase());
 
   if (applications.isLoading) {
     return (
@@ -133,11 +126,13 @@ export const AppSettingsPage = () => {
 
   return (
     <CollapsiblePanel label="Application Settings" defaultOpen>
-
-      <Heading margin={{ top: "none", bottom: "small" }} level={4}>
+      <Heading margin={{ top: 'none', bottom: 'small' }} level={4}>
         Auto-Discovered
       </Heading>
-      <Text>Greenroom apps on your LAN will be auto-discovered and appear here. If they are not on the LAN, you'll need to add them manually below.</Text>
+      <Text>
+        Greenroom apps on your LAN will be auto-discovered and appear here. If they are not on the
+        LAN, you'll need to add them manually below.
+      </Text>
       <br />
 
       {(discoveredApplications.data || []).length === 0 ? (
@@ -193,8 +188,7 @@ export const AppSettingsPage = () => {
         </Box>
       )}
 
-
-      <Heading margin={{ top: "medium", bottom: "small" }} level={4}>
+      <Heading margin={{ top: 'medium', bottom: 'small' }} level={4}>
         App Configuration Details
       </Heading>
       <Text>Manually specify the Greenroom app type and host.</Text>
@@ -211,7 +205,12 @@ export const AppSettingsPage = () => {
         </Box>
       )}
       {savedConfig && !isSaving && !submitError && (
-        <Box pad="small" background="green" margin={{ bottom: 'small' }} border={{ color: "white" }}>
+        <Box
+          pad="small"
+          background="green"
+          margin={{ bottom: 'small' }}
+          border={{ color: 'white' }}
+        >
           <Text color="white">Configuration saved successfully!</Text>
         </Box>
       )}
@@ -233,7 +232,6 @@ export const AppSettingsPage = () => {
         onSubmit={handleSubmit}
         disabled={isSaving}
       />
-
     </CollapsiblePanel>
   );
 };
