@@ -1,4 +1,4 @@
-import { Box, Text, Button, Card } from 'grommet';
+import { Box, Text, Button, Heading } from 'grommet';
 import { SchemaForm } from '@greenroom-robotics/alpha.schema-form';
 import { useConfig } from '../hooks/useConfig';
 import { useAsyncFn } from 'react-use';
@@ -73,7 +73,6 @@ export const AppSettingsPage = () => {
     discoveredApplications,
     updateApplications,
     updateConfig,
-    refreshDiscovery,
   } = useConfig();
 
   // Use useAsyncFn for form submission with built-in loading/error states
@@ -134,6 +133,72 @@ export const AppSettingsPage = () => {
 
   return (
     <CollapsiblePanel label="Application Settings" defaultOpen>
+
+      <Heading margin={{ top: "none", bottom: "small" }} level={4}>
+        Auto-Discovered
+      </Heading>
+      <Text>Greenroom apps on your LAN will be auto-discovered and appear here. If they are not on the LAN, you'll need to add them manually below.</Text>
+      <br />
+
+      {(discoveredApplications.data || []).length === 0 ? (
+        <Box pad="medium" background="background-contrast" round="small">
+          <Text color="text-weak" textAlign="center">
+            No services discovered. Ensure target hosts have Avahi configured.
+          </Text>
+        </Box>
+      ) : (
+        <Box gap="small">
+          {(discoveredApplications.data || []).map((discovered) => {
+            const configured = isAlreadyConfigured(discovered);
+            return (
+              <Box key={discovered.id} background="background-contrast" pad="small" border>
+                <Box direction="row" justify="between" align="center">
+                  <Box>
+                    <Box direction="row" gap="small" align="center">
+                      <Text weight="bold">{discovered.name}</Text>
+                      <Text size="xsmall" color="text-weak">
+                        {discovered.type.toUpperCase()}
+                      </Text>
+                      {configured && (
+                        <Text size="xsmall" color="green">
+                          CONFIGURED BELOW
+                        </Text>
+                      )}
+                    </Box>
+                    <Box direction="row" gap="small">
+                      <Text size="small" color="text-weak">
+                        {discovered.url}
+                      </Text>
+                      {discovered.vesselName && (
+                        <Text size="small" color="text-weak">
+                          | Vessel: {discovered?.vesselName}
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                  {!configured && (
+                    <Button
+                      icon={<Text size="large">+</Text>}
+                      size="small"
+                      primary
+                      onClick={() => handleAddDiscovered(discovered)}
+                      label="Add Application"
+                      color="brand"
+                    />
+                  )}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+
+
+      <Heading margin={{ top: "medium", bottom: "small" }} level={4}>
+        App Configuration Details
+      </Heading>
+      <Text>Manually specify the Greenroom app type and host.</Text>
+      <br />
       {/* Show save status */}
       {isSaving && (
         <Box pad="small" background="status-unknown" margin={{ bottom: 'small' }}>
@@ -146,7 +211,7 @@ export const AppSettingsPage = () => {
         </Box>
       )}
       {savedConfig && !isSaving && !submitError && (
-        <Box pad="small" background="status-ok" margin={{ bottom: 'small' }}>
+        <Box pad="small" background="green" margin={{ bottom: 'small' }} border={{ color: "white" }}>
           <Text color="white">Configuration saved successfully!</Text>
         </Box>
       )}
@@ -169,81 +234,6 @@ export const AppSettingsPage = () => {
         disabled={isSaving}
       />
 
-      {/* Discovered Services Section */}
-      <Box margin={{ top: 'medium' }}>
-        <Box direction="row" justify="between" align="center" margin={{ bottom: 'small' }}>
-          <Text weight="bold" size="large">
-            Discovered on Network
-          </Text>
-          <Button
-            label="Refresh"
-            size="small"
-            onClick={() => refreshDiscovery.mutate()}
-            disabled={refreshDiscovery.isPending}
-          />
-        </Box>
-        <Text size="small" color="text-weak" margin={{ bottom: 'small' }}>
-          Services discovered via mDNS. Click + to add to your configuration.
-        </Text>
-        {(discoveredApplications.data || []).length === 0 ? (
-          <Box pad="medium" background="background-contrast" round="small">
-            <Text color="text-weak" textAlign="center">
-              No services discovered. Ensure target hosts have Avahi configured.
-            </Text>
-          </Box>
-        ) : (
-          <Box gap="small">
-            {(discoveredApplications.data || []).map((discovered) => {
-              const configured = isAlreadyConfigured(discovered);
-              // Access raw discovered service data for metadata
-              const rawService = (discovered as unknown as { vesselName?: string; hostname?: string; product?: string });
-              return (
-                <Card key={discovered.id} background="background-contrast" pad="small">
-                  <Box direction="row" justify="between" align="center">
-                    <Box>
-                      <Box direction="row" gap="small" align="center">
-                        <Text weight="bold">{discovered.name}</Text>
-                        <Text size="xsmall" color="text-weak">
-                          {discovered.type.toUpperCase()}
-                        </Text>
-                        {configured && (
-                          <Text size="xsmall" color="status-ok">
-                            (configured)
-                          </Text>
-                        )}
-                      </Box>
-                      <Box direction="row" gap="small">
-                        <Text size="small" color="text-weak">
-                          {discovered.url}
-                        </Text>
-                        {rawService.vesselName && (
-                          <Text size="small" color="text-weak">
-                            | Vessel: {rawService.vesselName}
-                          </Text>
-                        )}
-                        {rawService.hostname && (
-                          <Text size="small" color="text-weak">
-                            | Host: {rawService.hostname}
-                          </Text>
-                        )}
-                      </Box>
-                    </Box>
-                    {!configured && (
-                      <Button
-                        icon={<Text size="large">+</Text>}
-                        size="small"
-                        primary
-                        onClick={() => handleAddDiscovered(discovered)}
-                        tip="Add to configuration"
-                      />
-                    )}
-                  </Box>
-                </Card>
-              );
-            })}
-          </Box>
-        )}
-      </Box>
     </CollapsiblePanel>
   );
 };
